@@ -172,4 +172,5 @@ Enum Modifier
 	Control=		LeftControl|RightControl
 	Alt=			LeftAlt|RightAlt
 	Gui=			LeftGui|RightGui
+	Command=	LeftGui|RightGui
 End
