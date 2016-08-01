@@ -203,6 +203,7 @@ Protected
 		canvas.Color = Color.Grey
 		Local ln:int
 		local ypos:int
+		local icn:int
 
 		For Local i := line0 Until line1
       ln = i + 1
@@ -216,6 +217,13 @@ Protected
         canvas.DrawText( String( ln ), clip.X+GutterWidth-8, i*LineHeight, 1, 0 )
       End If
       
+      
+      icn = GetCodeIcon( i )
+      if icn > 0 then
+				canvas.Color = Color.White
+        canvas.DrawImageIcon( _icons, clip.X+16, i*LineHeight,  icn, 80 )
+      end if  
+        
       if GetDebugState( i ) then
         canvas.Color = Color.White
         canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGON, 80 )
@@ -332,6 +340,9 @@ Class Mx2Document Extends Ted2Document
 		_textDoc.TextChanged = Lambda()
 			Dirty = True
 		End
+'		_textDoc.CursorMoved = Lambda()
+'			print "line="+_textDoc.CursorLine+" column="+_textDoc.CursorColumn
+'		end
 		
 '		_textDoc.CodeClicked = Lambda( line:int )
 '			print "Line clicked="+line

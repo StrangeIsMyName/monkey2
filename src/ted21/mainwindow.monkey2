@@ -789,7 +789,7 @@ Class MainWindowInstance Extends Window
 			End
 		Next
 		
-		_scriptMenu=New Menu( "Scripts" )
+		_scriptMenu = New Menu( "Scripts" )
 		Local obj := JsonObject.Load( "asset::ted2/scripts.json" )
 		Local hotkey := 0
 		If obj
@@ -810,7 +810,7 @@ Class MainWindowInstance Extends Window
 			Next
 		Endif
 
-		_scripts=New Menu( "Scripts..." )
+		_scripts = New Menu( "Scripts..." )
 		'Local obj:=JsonObject.Load( "asset::ted2/scripts.json" )
 		If obj
 			For Local obj2 := Eachin obj["scripts"].ToArray()
@@ -823,18 +823,18 @@ Class MainWindowInstance Extends Window
 			Next
 		Endif
 		
-		_recentFiles=New Menu( "Recent Files..." )
+		_recentFiles = New Menu( "Recent Files..." )
 		
-		_closeProject=New Menu( "Close Project..." )
+		_closeProject = New Menu( "Close Project..." )
 		
-		_fileMenu=New Menu( "File" )
+		_fileMenu = New Menu( "File" )
 		_fileMenu.AddAction( _fileNew, NODEKIND_NEW )
 		_fileMenu.AddSubMenu( _newFiles )
 		_fileMenu.AddAction( _fileOpen, NODEKIND_OPEN )
 		_fileMenu.AddAction( _fileReOpen )
 		_fileMenu.AddSubMenu( _recentFiles )
 		_fileMenu.AddSeparator()
-#If __HOSTOS__="macos"
+#If __HOSTOS__ = "macos"
 		_fileMenu.AddAction( _fileClose, NODEKIND_OSXCLOSE )
 #else		
 		_fileMenu.AddAction( _fileClose, NODEKIND_WINDOWCLOSE )
@@ -853,7 +853,7 @@ Class MainWindowInstance Extends Window
 		_fileMenu.AddSeparator()
 		_fileMenu.AddAction( _fileQuit )
 		
-		_editMenu=New Menu( "Edit" )
+		_editMenu = New Menu( "Edit" )
 		_editMenu.AddAction( _editUndo, NODEKIND_UNDO )
 		_editMenu.AddAction( _editRedo, NODEKIND_REDO )
 		_editMenu.AddSeparator()
@@ -883,9 +883,9 @@ Class MainWindowInstance Extends Window
 		
 		_helpMenu=New Menu( "Help" )
 		_helpMenu.AddAction( _helpOnlineHelp )
-		_helpMenu.AddAction( _helpOfflineHelp )
+		_helpMenu.AddAction( _helpOfflineHelp, NODEKIND_HELPBOOKS )
 		_helpMenu.AddSeparator()
-		_helpMenu.AddAction( _helpAbout )
+		_helpMenu.AddAction( _helpAbout, NODEKIND_HELP )
 
 		_panelMenu=New Menu( "Panels" )
 		_panelMenu.AddAction( _panelColor, NODEKIND_COLORPANEL )
@@ -1437,6 +1437,18 @@ Class MainWindowInstance Extends Window
 			If _currentTextView Then
       'print "here"
 				_codeView.ContentView = _currentTextView.Document.Code
+
+				_statusbar.SetCursor( _currentTextView.Document.CursorLine, _currentTextView.Document.CursorColumn, _currentTextView.Document.CursorChar )
+				_currentTextView.Document.SelectedIndex = _currentTextView.Document.CursorCodeLine
+
+				_currentTextView.Document.CursorMoved = Lambda()
+					_statusbar.SetCursor( _currentTextView.Document.CursorLine, _currentTextView.Document.CursorColumn, _currentTextView.Document.CursorChar )
+'					print _currentTextView.Document.CursorCodeLine
+					
+					_currentTextView.Document.SelectedIndex = _currentTextView.Document.CursorCodeLine
+					
+'					print "line="+_currentTextView.Document.CursorLine+" column="+_currentTextView.Document.CursorColumn
+				end
 	
 				_currentTextView.Document.Code.ModifyKind( null, NODEKIND_METHOD, _codeView.MethodState )
 				_currentTextView.Document.Code.ModifyKind( null, NODEKIND_FUNCTION, _codeView.FunctionState )
@@ -1446,6 +1458,15 @@ Class MainWindowInstance Extends Window
 				if _showConsole then _console.Visible = true
 			else	
 				_console.Visible = false
+				local imageView := Cast<ImageView>( doc.View )
+				
+				if imageView Then
+					imageView.ZoomChanged = Lambda()
+						_statusbar.SetImage( imageView.ImageWidth, imageView.ImageWidth, imageView.ImageZoom )
+					end
+
+					_statusbar.SetImage( imageView.ImageWidth, imageView.ImageWidth, imageView.ImageZoom )
+				end if
 			endif
 
 		end if

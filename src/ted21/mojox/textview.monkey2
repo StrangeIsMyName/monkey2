@@ -3,10 +3,11 @@ Namespace mojox
 
 
 global g_CodeKind:byte
+global g_CodeIcon:int
 global g_CodeText:String
 
-'Alias TextHighlighter:Int( text:String,colors:Byte[],sol:Int,eol:Int,state:Int )
-Alias TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:Int, eol:Int, state:Int )
+
+Alias TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[], tags:String[], sol:Int, eol:Int, state:Int )
 
 
 
@@ -41,17 +42,7 @@ Class TextDocument
 	End
 
 	
-#rem	
-	Method New( parent:TextView )
-		_lines.Push( New Line )
-'    print "new parent"
-'    if not parent then Return
-		Code =  new TreeView
-		Code.NodeClicked = Lambda( tnode:TreeView.Node, event:MouseEvent )
-			print "TextDocument clicked line=" + tnode.Line
-		end 
-	End
-#end
+
 
 	Property Text:String()
 		Return _text
@@ -63,7 +54,50 @@ Class TextDocument
 	End
 
 
+
+	Property CursorChar:int()
+		return _text.Mid(_cursorPos, 1)[0]
+	end
 	
+	
+	
+	Property CursorLine:int()
+		return 	FindLine( _cursorPos ) + 1
+	End
+
+
+
+	property CursorColumn:Int()
+		Return _cursorPos - StartOfLine( FindLine( _cursorPos ) )
+	End
+
+
+
+	property SelectedIndex:Int()
+		Return Code.SelectedIndex
+	Setter( selectedIndex:int )
+		Code.SelectedIndex = selectedIndex
+	End
+
+
+
+	property CursorCodeLine:Int()
+		return _lines[ FindLine( _cursorPos ) ].line
+	End
+
+
+
+	Property CursorPos:int()
+		Return _cursorPos
+	Setter( cursorPos:int )
+		if _cursorPos <> cursorPos then
+			_cursorPos = cursorPos
+			CursorMoved()
+		end if
+	End
+
+
+
 	Property ShowHighlightLine:Bool()
 		Return _showHighlightLine
 	Setter( showHighlightLine:Bool )
@@ -107,6 +141,18 @@ Class TextDocument
 	method GetDebugLine:int( line:int )
 		If line >= 0 And line < _lines.Length Return _lines[ line ].debug
 		Return -1
+	End
+
+
+	method GetCodeJumpLine:int( line:int )
+		If line >= 0 And line < _lines.Length Return _lines[ line ].line
+		Return 0
+	End
+
+
+	method GetCodeJumpIcon:int( line:int )
+		If line >= 0 And line < _lines.Length Return _lines[ line ].icon
+		Return 0
 	End
 
 
@@ -258,6 +304,9 @@ Class TextDocument
 				_lines.Data[i].eol = _lines[i-dlines].eol+dchars
 				_lines.Data[i].state = _lines[i-dlines].state
 				_lines.Data[i].debug = _lines[i-dlines].debug
+
+				_lines.Data[i].line = _lines[i-dlines].line
+				_lines.Data[i].icon = _lines[i-dlines].icon
 			Wend
 		
 		Endif
@@ -265,8 +314,13 @@ Class TextDocument
 		For Local i := 0 Until eols2+1
 			eol = _text.Find( "~n",eol+1 )
 			If eol = -1 then eol = _text.Length
-			_lines.Data[line+i].eol = eol
-			_lines.Data[line+i].state = -1
+			_lines.Data[line + i].eol = eol
+			_lines.Data[line + i].state = -1
+			if line > 0 then
+				_lines.Data[line + i].line = _lines.Data[line].line
+			end if	
+			_lines.Data[line + i].icon = 0
+
 		Next
 		
 		If dlines < 0 then
@@ -276,6 +330,9 @@ Class TextDocument
 				_lines.Data[i].eol = _lines[i-dlines].eol+dchars
 				_lines.Data[i].state = _lines[i-dlines].state
 				_lines.Data[i].debug = _lines[i-dlines].debug
+
+				_lines.Data[i].line = _lines[i-dlines].line
+				_lines.Data[i].icon = _lines[i-dlines].icon
 				i += 1
 			Wend
 
@@ -297,32 +354,48 @@ Class TextDocument
 			Local state := -1
 			If line state = _lines[line-1].state
 			
+			local jumpline:int = -1
+			
 			For Local i := 0 Until eols2 + 1
-				state = _highlighter( _text, _colors.Data, _tags.Data, StartOfLine( line ), EndOfLine( line ), state )
+				state = _highlighter( self, _text, _colors.Data, _tags.Data, StartOfLine( line ), EndOfLine( line ), state )
 				_lines.Data[line].state = state
+				_lines.Data[line].icon = 0
+				
+'				print "1 "+line+" "+jumpline
 				
 				if g_CodeKind > -1 Then
 					'print "1>"+GetLineTabs(line)
 					'print "1 "+line+" "+g_CodeText+" "+g_CodeKind
-          
+
+					jumpline = Code.IndexCount'line
 					Code.AddNode( g_CodeText, g_CodeKind, line, GetLineTabs(line) )
+					_lines.Data[line].icon = g_CodeIcon
 				Endif
+
+				_lines.Data[line].line = jumpline
 				
 				line += 1
 			Next
-			
+
+			jumpline = line
 			While line < _lines.Length 'And state<>_lines[line].state
-				state = _highlighter( _text, _colors.Data, _tags.Data, StartOfLine( line ), EndOfLine( line ), state )
+				state = _highlighter( self, _text, _colors.Data, _tags.Data, StartOfLine( line ), EndOfLine( line ), state )
 				_lines.Data[line].state = state
+				_lines.Data[line].icon = 0
 				
+'				print "2 "+line
+
 				if g_CodeKind > -1 Then
 					'print "2>"+GetLineTabs(line)
 					
 					'print "2 "+line+" "+g_CodeText+" "+g_CodeKind
 
+					jumpline = Code.IndexCount'line
 					Code.AddNode( g_CodeText, g_CodeKind, line, GetLineTabs(line) )
-					
+					_lines.Data[line].icon = g_CodeIcon
 				Endif
+
+				_lines.Data[line].line = jumpline
 				
 				line += 1
 			End
@@ -488,9 +561,14 @@ Private
 		Field eol:Int
 		Field state:Int
 		field debug:int
+		
+		field icon:Int
+		field line:int
 	End
 	
 	Field _text:String
+	
+	field _cursorPos:Int
 	
 	Field _lines := New Stack<Line>
 	Field _colors := New Stack<Byte>
@@ -613,7 +691,19 @@ Class TextView Extends View
  		return _doc.GetDebugLine( line )
 	end
 	
+
+
+	method GetCodeJump:int( line:int )
+ 		return _doc.GetCodeJumpLine( line )
+	end
 	
+
+
+	method GetCodeIcon:int( line:int )
+ 		return _doc.GetCodeJumpIcon( line )
+	end
+
+
 	
 	Property TextColors:Color[]()
 		Return _textColors
@@ -1093,6 +1183,7 @@ Class TextView Extends View
 		_cursor = _doc.StartOfLine( showLine )
 		_anchor = _cursor
 		UpdateCursor()
+		
 		_cursor = _doc.StartOfLine( line ) + row
 		_anchor = _cursor
 		UpdateCursor()
@@ -1318,7 +1409,7 @@ Private
 		
 		_cursorRect = rect
 		_columnX = rect.X
-		
+
 		CursorMoved()
 	End
 
@@ -1420,6 +1511,7 @@ Private
   
 	
 	Method MoveLine( delta:Int )
+
 		Local line := Clamp( Row( _cursor )+delta, 0, _doc.LineCount-1 )
 		
 		_cursor = PointXToIndex( _columnX, line )
@@ -1929,6 +2021,9 @@ Protected
 				ReplaceText( event.Text )
 			
 		End
+		
+		_doc.CursorPos = _cursor
+		
 	End
 
 
@@ -1952,8 +2047,9 @@ Protected
 				Else
 					ExpandSelect( event.Location )
 					UpdateCursor()
-					_doc.CursorMoved()
 				end If
+				
+				_doc.CursorPos = _cursor
         
 			Case EventType.MouseUp
 				_dragging = False

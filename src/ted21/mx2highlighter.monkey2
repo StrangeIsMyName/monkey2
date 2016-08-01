@@ -20,7 +20,7 @@ Const COLOR_STRUCT := 13
 Const COLOR_LAMBDA := 14
 
 
-Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:Int, eol:Int, state:Int )
+Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[], tags:String[], sol:Int, eol:Int, state:Int )
 '  print text
   
 	Local i0 := sol
@@ -36,6 +36,7 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 	local output:string = ""
 	g_CodeKind = -1
 	g_CodeText = ""
+	g_CodeIcon = 0
 	
 	
 	If state > -1 then icolor = COLOR_COMMENT
@@ -426,9 +427,14 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 	
 	if output <> "" Then
 		g_CodeText = output
+		g_CodeIcon = g_CodeKind
+				
     'g_CodeKind = 1
     
 '    print output+" "+istart+" "+eol
+
+'    print output+" line="+parent.FindLine( istart )
+'		print Parent
 	end If
 	
 	'print "<--end"

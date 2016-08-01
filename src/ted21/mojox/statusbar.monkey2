@@ -8,6 +8,10 @@ Const STATUSBAR_RUNNING:Int = 2
 Const STATUSBAR_BUILDING:Int = 3
 Const STATUSBAR_ERROR:Int = 4
 
+Const STATUSBARKIND_NONE:int = 0
+Const STATUSBARKIND_TEXT:int = 1
+Const STATUSBARKIND_IMAGE:int = 2
+
 
 
 Class StatusBar Extends Button
@@ -19,10 +23,36 @@ Class StatusBar Extends Button
 '    _display = display
 '  End 
 
+	Property DocumentKind:int()
+		return _displayKind
+	Setter( documentKind:int )
+		_displayKind = documentKind
+	end
+	
+	
+	Method SetImage( width:int, height:int, zoom:float )
+		_displayKind = STATUSBARKIND_IMAGE
+
+		_width = width
+		_height = height
+		_zoom = zoom
+	end
+	
+	
+	Method SetCursor( line:int, column:int, chr:int )
+		_displayKind = STATUSBARKIND_TEXT
+		
+		_line = line
+		_column = column
+		_chr = chr
+	end 
+	
+	
+	
   Method SetText(txt:String = "")
-    print "SetText"
+    'print "SetText"
     If _display = STATUSBAR_DEBUG Then Return
-    print " ok"
+    'print " ok"
     
     _display = STATUSBAR_NORMAL
     If txt = "" Then
@@ -101,7 +131,7 @@ Class StatusBar Extends Button
 
 '    Local width := _current.View.Container.Frame.Width
 		Local tx:Int = 10
-		Local ty:Int = 5
+		Local ty:Int = 6
 
     Select _display
       Case STATUSBAR_NORMAL
@@ -110,6 +140,21 @@ Class StatusBar Extends Button
         canvas.Color = Color.White
         canvas.DrawText( _text, tx, ty )
         
+        select _displayKind
+					case STATUSBARKIND_NONE
+					case STATUSBARKIND_TEXT
+						canvas.DrawText( "Line  "+_line, Width-250, ty)
+						canvas.DrawText( "Column  "+_column, Width-170, ty)
+						canvas.DrawText( "Chr  "+_chr, Width-70, ty)
+						
+					case STATUSBARKIND_IMAGE
+						canvas.DrawText( "Width  "+_width, Width-290, ty)
+						canvas.DrawText( "Height  "+_height, Width-190, ty)
+						canvas.DrawText( "Zoom  "+_zoom+"%", Width-90, ty)
+				end select
+					
+
+
       Case STATUSBAR_DEBUG
         canvas.Color = New Color( .7,.3,0, 1 )
         canvas.DrawRect( 0,0, Width, Height )
@@ -169,5 +214,15 @@ Class StatusBar Extends Button
   Field _display:Int = STATUSBAR_NORMAL
   Field _text:String = "Ready"
   Field _buildpos:float
-
+  
+  field _line:Int = 0
+  field _column:int = 0
+  field _chr:int = 0
+  
+  field _width:int = 0
+  field _height:int = 0
+  field _zoom:float = 1
+  
+  field _displayKind:int = STATUSBARKIND_NONE
+  
 End

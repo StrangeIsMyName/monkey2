@@ -410,6 +410,7 @@ Class CodeTreeView Extends View
 	end method
 
 	
+	
 	Property RootNode:Node()
 		Return _rootNode
 	Setter( node:Node)

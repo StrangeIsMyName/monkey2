@@ -72,6 +72,7 @@ End
 
 Class ImageView Extends View
 
+	Field ZoomChanged:Void()
 
 
 	Method New( doc:ImgDocument )
@@ -89,6 +90,20 @@ Class ImageView Extends View
 		_zoom = zoom
 	End
 
+
+	Property ImageWidth:int()
+		return _doc.Image.Width
+	End
+	
+
+	Property ImageHeight:int()
+		return _doc.Image.Height
+	End
+
+
+	Property ImageZoom:int()
+		return int(_zoom * 100)
+	End
 
 	
 Protected
@@ -252,13 +267,16 @@ Protected
         Select _over
           Case 1
             _zoom *= 2
+						ZoomChanged()
           Case 2
             _zoom /= 2
+						ZoomChanged()
           Case 0
             _zoom = 1
             _imageOffsetX = 0
             _imageOffsetY = 0
             _mouseDownX = -1
+						ZoomChanged()
          default
             _mouseDownX = event.Location.X - _imageOffsetX
             _mouseDownY = event.Location.Y - _imageOffsetY
@@ -272,6 +290,7 @@ Protected
           _zoom /= 2
         Endif
         If _zoom < 0.01 Then _zoom = 0.01
+				ZoomChanged()
 		End
 	End
 
@@ -297,6 +316,7 @@ Protected
         End
 
         If _zoom < 0.01 Then _zoom = 0.01
+        ZoomChanged()
 		End
 		
 		Super.OnKeyEvent( event)
@@ -304,7 +324,7 @@ Protected
 	End
 
 	
-	Private
+Private
   
   Field _mouseDownX:Int = -1
   Field _mouseDownY:Int = -1
