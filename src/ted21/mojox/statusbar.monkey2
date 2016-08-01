@@ -1,0 +1,173 @@
+
+Namespace mojox
+
+
+Const STATUSBAR_NORMAL:Int = 0
+Const STATUSBAR_DEBUG:Int = 1
+Const STATUSBAR_RUNNING:Int = 2
+Const STATUSBAR_BUILDING:Int = 3
+Const STATUSBAR_ERROR:Int = 4
+
+
+
+Class StatusBar Extends Button
+
+
+'	Property Display:Int()
+'		Return _display
+'	Setter( display:Int )
+'    _display = display
+'  End 
+
+  Method SetText(txt:String = "")
+    print "SetText"
+    If _display = STATUSBAR_DEBUG Then Return
+    print " ok"
+    
+    _display = STATUSBAR_NORMAL
+    If txt = "" Then
+      _text = "Ready"
+    else
+      _text = txt
+    End if
+  End 
+
+
+  Method SetDebug(txt:String = "")
+    _display = STATUSBAR_DEBUG
+    _text = txt
+  End 
+  
+
+  Method EndDebug()
+    If _display <> STATUSBAR_DEBUG Then return
+    print "EndDebug"
+    _display = STATUSBAR_NORMAL
+    _text = "Ready"
+  End 
+
+  
+  Method SetNormal()
+    print "Debug"
+    If _display = STATUSBAR_DEBUG Then Return
+    print " ok"
+   
+    _display = STATUSBAR_NORMAL
+  End 
+
+
+  Method SetError(txt:String = "")
+    print "Error"
+    If _display = STATUSBAR_DEBUG Then Return
+    print " ok"
+    
+    _display = STATUSBAR_ERROR
+    _text = txt
+  End 
+
+
+
+  Method SetRunning()
+    print "Running"
+    If _display = STATUSBAR_DEBUG Then Return
+    print " ok"
+    
+    _display = STATUSBAR_RUNNING
+  End 
+
+
+  Method SetBuilding(ps:float, txt:string)
+    'print "Building"
+    If _display = STATUSBAR_DEBUG Then Return
+    'print " ok"
+    
+    _text = txt
+    _display = STATUSBAR_BUILDING
+    _buildpos = ps / 11.0
+  End 
+
+
+
+	Method New()
+		Layout="fill"
+		Style=Style.GetStyle( "mojo.StatusBar" )
+	End
+
+
+	Method OnRender( canvas:Canvas ) Override
+'		If Icon
+'			canvas.DrawImage( Icon, 4,4,0, 1.5,1.5 )
+'		Endif
+
+'    Local width := _current.View.Container.Frame.Width
+		Local tx:Int = 10
+		Local ty:Int = 5
+
+    Select _display
+      Case STATUSBAR_NORMAL
+        canvas.Color = New Color( 0.1,0.3,0.6, 1 )
+        canvas.DrawRect( 0,0, Width, Height )
+        canvas.Color = Color.White
+        canvas.DrawText( _text, tx, ty )
+        
+      Case STATUSBAR_DEBUG
+        canvas.Color = New Color( .7,.3,0, 1 )
+        canvas.DrawRect( 0,0, Width, Height )
+        
+        canvas.Color = Color.White
+        canvas.DrawText( "Debug   " + _text, tx, ty )
+        
+      Case STATUSBAR_RUNNING
+        canvas.Color = New Color( .1,.5, 0.1, 1 )
+        canvas.DrawRect( 0,0, Width, Height )
+        canvas.Color = Color.White
+        canvas.DrawText( "Running   ", tx, ty )
+        
+      Case STATUSBAR_BUILDING
+        canvas.Color = New Color( 0.1,0.1,0.6, 1 )
+        canvas.DrawRect( 0,0, Width, Height )
+
+        canvas.Color = New Color( 0.1,0.5,0.1, 1 )
+        canvas.DrawRect( 0,0, Width * _buildpos, Height )
+        
+        canvas.Color = Color.White
+        canvas.DrawText( "Building   "+int(_buildpos * 100)+"%     "+_text, tx, ty )
+        
+      Case STATUSBAR_ERROR
+        canvas.Color = New Color( .4,.0,0, 1 )
+        canvas.DrawRect( 0,0, Width, Height )
+        
+        canvas.Color = Color.White
+        canvas.DrawText( _text, tx, ty )
+    End Select
+    
+
+
+'    If _hover
+'      canvas.Color = New Color( 1,1,1, 0.5 )
+'      canvas.DrawLine ( 0,1, 0, 26 )
+'      canvas.DrawLine ( 0,3, 29, 3 )
+'      canvas.DrawLine ( 0,26, 29, 26 )
+'      canvas.DrawLine ( 29,3, 29, 27 )
+'    End if
+  End
+
+'	Method AddAction( action:Action )
+'		Local button:=New ToolButton( action )
+'		AddView( button,"left",0 )
+'	End
+
+	
+	
+'	Method AddAction:Action( label:String="",icon:Image=Null )
+'		Local action:=New Action( label,icon )
+'		AddAction( action )
+'		Return action
+'	End
+
+
+  Field _display:Int = STATUSBAR_NORMAL
+  Field _text:String = "Ready"
+  Field _buildpos:float
+
+End

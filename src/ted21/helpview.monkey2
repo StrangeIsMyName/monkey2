@@ -46,24 +46,26 @@ Class HelpView Extends DockingView
 	Method New()
 		_findField = New TextField
 		_findField.TabHit = Lambda()
-      If _findField.Document.Text <> _matchText Or Not _matches.Length Then Return
+			If _findField.Document.Text <> _matchText Or Not _matches.Length Then Return
 			
 			_matchId = (_matchId + 1) Mod _matches.Length
 			Go( _matches[_matchId] )
 		End
 		
-		_findField.Document.TextChanged = Lambda()
+'		_findField.Document.TextChanged = Lambda()
+'			UpdateMatches( _findField.Text )
+'			If _matches.Length Go( _matches[0] )
+'		End
+
+
+		_actionFind = New Action( "find" )
+		_actionFind.Triggered = Lambda()
+			print "find "+_findField.Text
 			UpdateMatches( _findField.Text )
 			If _matches.Length Go( _matches[0] )
 		End
-
-
-    _actionFind = New Action( "find" )
-    _actionFind.Triggered = Lambda()
-'      caller.CloseButtonChanged()
-'        print "close"
-    End
-    _findButton = New Buttonx( _actionFind, "", 40, 40)
+		_findButton = New Buttonx( _actionFind, "", 40, 40)
+		_findButton.ImageIcon = NODEKIND_FIND
 		
 		
 		Local findBar := New DockingView
@@ -104,7 +106,7 @@ Class HelpView Extends DockingView
 
 
 	Method OnRender( canvas:Canvas ) Override
-  end Method
+	end Method
   
 
 	
@@ -164,15 +166,13 @@ Class HelpView Extends DockingView
 	
 Private
 
-
-	
 	Field _findField:TextField
 	Field _helpTree:HelpTree
 	Field _htmlView:HtmlView
 	Field _scroller:ScrollView
 
-  Field _findButton:Buttonx
-  Field _actionFind:Action
+	Field _findButton:Buttonx
+	Field _actionFind:Action
 
 	
 	Field _matchId:Int
@@ -204,39 +204,39 @@ Class HelpTree Extends TreeView
 		Method New( obj:JsonObject, parent:TreeView.Node, tree:HelpTree )
 			Super.New( "", NODEKIND_NONE, parent )
 
-      Index = tree._indexCount
-      tree._indexCount += 1
-      
-      
+			Index = tree._indexCount
+			tree._indexCount += 1
+			
+		
 			Label = obj["text"].ToString()
 			Select Label
-        Case "Modules"
-          Kind = NODEKIND_MODULE
-        Case "Enums"
-          Kind = NODEKIND_ENUM
-        Case "Classes"
-          Kind = NODEKIND_CLASS
-        Case "Globals"
-          Kind = NODEKIND_GLOBAL
-        Case "Constants"
-          Kind = NODEKIND_CONST
-        Case "Constructors", "Contructors"
-          Kind = NODEKIND_CONSTRUCTOR
-        Case "Methods"
-          Kind = NODEKIND_METHOD
-        Case "Functions"
-          Kind = NODEKIND_FUNCTION
-        Case "Structs"
-          Kind = NODEKIND_STRUCT
-        Case "Properties"
-          Kind = NODEKIND_PROPERTY
-        Case "Events"
-          Kind = NODEKIND_EVENT
-        Case "Fields"
-          Kind = NODEKIND_FIELD
-          
-        Default
-          Kind = parent.Kind
+				Case "Modules"
+					Kind = NODEKIND_MODULE
+				Case "Enums"
+					Kind = NODEKIND_ENUM
+				Case "Classes"
+					Kind = NODEKIND_CLASS
+				Case "Globals"
+					Kind = NODEKIND_GLOBAL
+				Case "Constants"
+					Kind = NODEKIND_CONST
+				Case "Constructors", "Contructors"
+					Kind = NODEKIND_CONSTRUCTOR
+				Case "Methods"
+					Kind = NODEKIND_METHOD
+				Case "Functions"
+					Kind = NODEKIND_FUNCTION
+				Case "Structs"
+					Kind = NODEKIND_STRUCT
+				Case "Properties"
+					Kind = NODEKIND_PROPERTY
+				Case "Events"
+					Kind = NODEKIND_EVENT
+				Case "Fields"
+					Kind = NODEKIND_FIELD
+				
+				Default
+					Kind = parent.Kind
 			End Select
 
 			If obj.Contains( "data" )
@@ -247,15 +247,15 @@ Class HelpTree Extends TreeView
 			Endif
 			
 			If obj.Contains( "children" )
-        Local count:Int = 0
+				Local count:Int = 0
 				For Local child := Eachin obj["children"].ToArray()
 					New Node( Cast<JsonObject>( child ), Self, tree )
-          count = count + 1
+					count = count + 1
 				Next
          
-        If count = 0 Then
-          Kind = parent.Kind
-        End if
+				If count = 0 Then
+					Kind = parent.Kind
+				End if
 '        print Label+" "+count
 			Endif
 

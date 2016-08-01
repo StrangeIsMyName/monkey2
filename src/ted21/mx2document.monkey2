@@ -2,7 +2,17 @@
 Namespace ted2
 
 Global Mx2Keywords := New StringMap<String>
-const Mx2Fields:string = "field;global;void;bool;byte;ubyte;short;ushort;int;uint;long;ulong;float;double;String;"
+const Mx2Fields:string = "const;field;global;void;bool;byte;ubyte;short;ushort;int;uint;long;ulong;float;double;string;"
+const Mx2Function:string = "function;"
+const Mx2Method:string = "method;"
+const Mx2Class:string = "class;"
+const Mx2ClassPrivate:string = "private"
+const Mx2ClassPublic:string = "public"
+const Mx2ClassProtected:string = "protected"
+const Mx2ClassFriend:string = "friend"
+const Mx2Property:string = "property;setter;"
+const Mx2Struct:string = "struct;"
+const Mx2Lambda:string = "lambda;"
 
 Private
 
@@ -75,16 +85,17 @@ Class Mx2TextView Extends TextView
 		
 		Document = _mx2Doc.TextDocument
 		Document.ShowHidden = true
-		Document.CodeClicked = Lambda( line:int )
-'			print "Line clicked="+line
-			GotoLine( line )
+		Document.ShowHighlightLine = true
+		Document.CodeClicked = Lambda( line:int, txt:string )
+'			print "Line clicked="+line+" "+txt
+			GotoLine( line, txt )
 		end
 
 		Style = Style.GetStyle( "mojo.mx2Document" )
 		
-		GutterWidth = 64
+		GutterWidth = 80
 		
-		Local _editorColors:=New Color[9]
+		Local _editorColors:=New Color[15]
 		
 		Select Theme.Name
       Case "light"
@@ -96,15 +107,27 @@ Class Mx2TextView Extends TextView
         _editorColors[COLOR_PREPROC]=New Color( .8,.65,0 )
         _editorColors[COLOR_OTHER]=New Color( .1,.1,.1 )
 				_editorColors[COLOR_FIELD]=New Color( 0,0,1 )
+				_editorColors[COLOR_METHOD]=New Color( 0,0,1 )
+				_editorColors[COLOR_FUNCTION]=New Color( 0,0,1 )
+				_editorColors[COLOR_CLASS]=New Color( 0,0,1 )
+				_editorColors[COLOR_PROPERTY]=New Color( 0,0,1 )
+				_editorColors[COLOR_STRUCT]=New Color( 0,0,1 )
+				_editorColors[COLOR_LAMBDA]=New Color( 0,0,1 )
       Default
-        _editorColors[COLOR_IDENT]=New Color( 1,1,1 )
-        _editorColors[COLOR_KEYWORD]=New Color( 1,1,0 )
-        _editorColors[COLOR_STRING]=New Color( 1,0,0.5 )
-        _editorColors[COLOR_NUMBER]=New Color( 0,1,.5 )
+        _editorColors[COLOR_IDENT]=New Color( .8,.8,.8 )
+        _editorColors[COLOR_KEYWORD]=New Color( .35,.5,.73 )
+        _editorColors[COLOR_STRING]=New Color( 1,.5,0.7 )
+        _editorColors[COLOR_NUMBER]=New Color( 0,.8,.6 )
         _editorColors[COLOR_COMMENT]=New Color( .4,.5,.4 )
         _editorColors[COLOR_PREPROC]=New Color( 1,.75,0 )
         _editorColors[COLOR_OTHER]=New Color( 0,1,.5 )
         _editorColors[COLOR_FIELD]=New Color( .32,.8,.31 )
+        _editorColors[COLOR_METHOD]=New Color( .25,.6,.82 )
+        _editorColors[COLOR_FUNCTION]=New Color( .61,.36,.72 )
+        _editorColors[COLOR_CLASS]=New Color( .61,.36,.72 )
+        _editorColors[COLOR_PROPERTY]=New Color( .89,.64,.17 )
+        _editorColors[COLOR_STRUCT]=New Color( .25,.6,.82 )
+        _editorColors[COLOR_LAMBDA]=New Color( .89,.64,.17 )
 		End
 		
 		TextColors=_editorColors
@@ -195,11 +218,13 @@ Protected
       
       if GetDebugState( i ) then
         canvas.Color = Color.White
-        canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  39, 48 )
+        canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGON, 80 )
       else
         canvas.Color = Color.Grey
-        canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  38, 48 )
+        canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGOFF, 80 )
       end if
+
+      'canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  10, 48 )
       
 		Next
 	End

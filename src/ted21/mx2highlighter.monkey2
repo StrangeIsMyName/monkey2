@@ -12,6 +12,12 @@ Const COLOR_COMMENT := 5
 Const COLOR_PREPROC := 6
 Const COLOR_OTHER := 7
 Const COLOR_FIELD := 8
+Const COLOR_METHOD := 9
+Const COLOR_FUNCTION := 10
+Const COLOR_CLASS := 11
+Const COLOR_PROPERTY := 12
+Const COLOR_STRUCT := 13
+Const COLOR_LAMBDA := 14
 
 
 Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:Int, eol:Int, state:Int )
@@ -21,7 +27,7 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 	
 	Local icolor := 0
 	Local itag := ""
-	Local istart :=sol
+	Local istart := sol
 	Local preproc := False
 	local id:string
 	
@@ -36,7 +42,7 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 	
 	
 	While i0 < eol
-    id = ""
+		id = ""
 		Local start := i0
 		Local chr := text[i0]
 		i0 += 1
@@ -49,31 +55,29 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 		Endif
 		
 		If preproc Then
-      if  (IsAlpha( chr ) Or chr = 95) Then
-        While i0 < eol And (IsAlpha( text[i0] ) Or IsDigit( text[i0] )  Or text[i0] = 95)
-          i0 += 1
-        Wend
-        
-        Local id := text.Slice( start, i0 )
-        
-        Select id.ToLower()
-          Case "rem"
-            state += 1
-            icolor = COLOR_COMMENT
-            itag = ""
-          Case "end"
-            If state > -1 then 
-              state -= 1
-              icolor = COLOR_COMMENT
-              itag = ""
-            Endif
-        End
-        
-        Exit
-        
-      Else
-        output = "----"
-      endif
+			if  (IsAlpha( chr ) Or chr = 95) Then
+				While i0 < eol And (IsAlpha( text[i0] ) Or IsDigit( text[i0] )  Or text[i0] = 95)
+					i0 += 1
+				Wend
+			
+				Local id := text.Slice( start, i0 )
+			
+				Select id.ToLower()
+					Case "rem"
+						state += 1
+						icolor = COLOR_COMMENT
+						itag = ""
+					Case "end"
+						If state > -1 then 
+							state -= 1
+							icolor = COLOR_COMMENT
+							itag = ""
+						Endif
+				End
+
+				Exit
+
+			endif
       
 		Endif
 
@@ -105,10 +109,10 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 			
 			If preproc And istart = sol then
 				Select id.ToLower()
-          Case "rem"				
-            state += 1
-          Case "end"
-            state = Max( state-1, -1 )
+					Case "rem"				
+						state += 1
+					Case "end"
+						state = Max( state-1, -1 )
 				End
 				
 				icolor = COLOR_COMMENT
@@ -149,10 +153,95 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 			
 		Endif
 
-		if color = COLOR_KEYWORD and Mx2Fields.Find( id.ToLower() ) > -1 Then
-			color = COLOR_FIELD
+		if color = COLOR_KEYWORD Then
+			local idl:string = id.ToLower()
+			
+			'print idl
+			
+			if Mx2Fields.Find( idl ) > -1 Then
+				color = COLOR_FIELD
+			else	
+				if Mx2Method.Find( idl ) > -1 then
+					color = COLOR_METHOD
+				else
+					if Mx2Function.Find( idl ) > -1 then
+						color = COLOR_FUNCTION
+					else
+						if Mx2Property.Find( idl ) > -1 then
+							color = COLOR_PROPERTY
+						else
+							if Mx2Class.Find( idl ) > -1 then
+								color = COLOR_CLASS
+								showNext = 2
+							else
+								if Mx2Struct.Find( idl ) > -1 then
+									color = COLOR_STRUCT
+									showNext = 10
+								else
+									if Mx2Lambda.Find( idl ) > -1 then
+										color = COLOR_LAMBDA
+										showNext = 11
+									else
+									
+										if Mx2ClassPrivate = idl then
+											color = COLOR_CLASS
+											output = "Private"
+											g_CodeKind = NODEKIND_CLASSEXTRA
+											showNext = False
+
+										else
+											if Mx2ClassPublic = idl then
+												color = COLOR_CLASS
+												g_CodeKind = NODEKIND_CLASSEXTRA
+												output = "Public"
+												showNext = False
+											else
+												if Mx2ClassProtected = idl then
+													color = COLOR_CLASS
+													g_CodeKind = NODEKIND_CLASSEXTRA
+													output = "Protected"
+													showNext = False
+												else
+													if Mx2ClassFriend = idl then
+														color = COLOR_CLASS
+														g_CodeKind = NODEKIND_CLASSEXTRA
+														output = "Friend"
+														showNext = False
+													else
+													end if
+												end if
+											end if
+										end if
+									end if
+								end if
+							end if
+						end if
+					end if
+				end if
+			end if
+			
 		end if
 		
+		select showNext
+			case 2,5
+				id = ""
+				local pos:int = start+6
+				while text.Mid( pos, 1 ) >= " "
+					id += text.Mid( pos, 1 )
+					pos += 1
+				wend
+
+			case 10
+				id = ""
+				local pos:int = start+7
+				while text.Mid( pos, 1 ) >= " "
+					id += text.Mid( pos, 1 )
+					pos += 1
+				wend
+				'print "here " + id
+				
+		end select
+
 		If color = icolor Continue
 		
 		For Local i := istart Until start
@@ -161,121 +250,173 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 		Next
 		
 		select showNext
-      case 1'function
+			case 1'function
 '        output = "Function:  " + tags[istart]
-        output = tags[istart]
-        g_CodeKind = NODEKIND_FUNCTION
-        showNext = false
+				output = tags[istart]
+				g_CodeKind = NODEKIND_FUNCTION
+				showNext = false
         
-      case 2'class 
-'        output = "Class:  " + tags[istart]
-        output = tags[istart]
-        g_CodeKind = NODEKIND_CLASS
-        showNext = false
+			case 2'class
+				if id.Length = 0 then
+					id = text.Slice( showStart, start )
+				end If
+            
+				if tags[istart] = "" then    
+					output = id
+				else
+					output = tags[istart]
+				end if
+        
+				g_CodeKind = NODEKIND_CLASS
+				showNext = False
 
-      case 3 'method
-        if id.Length = 0 then
-          id = text.Slice( showStart, start )
-        end if
+			case 3 'method
+				if id.Length = 0 then
+					id = text.Slice( showStart, start )
+				end if
             
 '        output = "Method:  " + id
-        output = id
-        g_CodeKind = NODEKIND_METHOD
-        showNext = false
+				output = id
+				g_CodeKind = NODEKIND_METHOD
+				showNext = false
 
-      case 4 'property
+			case 4 'property
 '        output = "Property:  " + tags[istart]
-        output = tags[istart]
-        g_CodeKind = NODEKIND_PROPERTY
-        showNext = false
+				output = tags[istart]
+				g_CodeKind = NODEKIND_PROPERTY
+				showNext = false
 
-      case 5 'field
-'        output = "Field:  " + tags[istart]
-        output = tags[istart]
-        g_CodeKind = NODEKIND_FIELD
-        showNext = false
-
-      case 6 'global
-'        output =  "Global:  " + tags[istart]
-        output = tags[istart]
-        g_CodeKind = NODEKIND_GLOBAL
-        showNext = false
-
-      case 7 'operator
-        if id.Length = 0 then
-          id = text.Slice( showStart, start )
-        end if
+			case 5 'field
+				if id.Length = 0 then
+					id = text.Slice( showStart, start )
+				end if
             
-        output = id
+				if tags[istart] = "" then    
+					output = id
+				else
+					output = tags[istart]
+				end if
+        output = tags[istart]
+'        output = tags[istart]
+				g_CodeKind = NODEKIND_FIELD
+				showNext = false
+
+			case 6 'global
+'        output =  "Global:  " + tags[istart]
+				output = tags[istart]
+				g_CodeKind = NODEKIND_GLOBAL
+				showNext = false
+
+			Case 7 'operator
+				if id.Length = 0 then
+					id = text.Slice( showStart, start )
+				end if
+            
+				output = id
 
 '        output = "Operator:  " + tags[istart]
 '        output = tags[istart]
-        g_CodeKind = NODEKIND_OPERATOR
-        showNext = false
+				g_CodeKind = NODEKIND_OPERATOR
+				showNext = false
 
-      case 8 'const
+			case 8 'const
 '        output =  "Const:  " + tags[istart]
-        output = tags[istart]
-        g_CodeKind = NODEKIND_CONST
-        showNext = false
+				output = tags[istart]
+				g_CodeKind = NODEKIND_CONST
+				showNext = false
 
-      case 9 'enum
+			case 9 'enum
 '        output = "Enum:  " + tags[istart]
-        output = tags[istart]
-        g_CodeKind = NODEKIND_ENUM
-        showNext = false
+				output = tags[istart]
+				g_CodeKind = NODEKIND_ENUM
+				showNext = false
 
-      case 10 'struct
+			case 10 'struct
+				if id.Length = 0 then
+					id = text.Slice( showStart, start )
+				end if
+            
+'        output = "Method:  " + id
+				output = id
 '        output = "Struct:  " + tags[istart]
-        output = tags[istart]
-        g_CodeKind = NODEKIND_STRUCT
-        showNext = false
+'        output = tags[istart]
+				g_CodeKind = NODEKIND_STRUCT
+				showNext = false
+
+			case 11 'lambda
+				'print "lambda "+text.Mid(start, 6)+" start="+start
+				
+				g_CodeKind = NODEKIND_LAMBDA
+
+				local pos:int = start - 1
+				
+				while text.Mid( pos, 1 ) = " " or text.Mid( pos, 1 ) = "+" or text.Mid( pos, 1 ) = "-" or text.Mid( pos, 1 ) = "=" or text.Mid( pos, 1 )[0] = 9 or  text.Mid( pos, 1 )[0] = 95
+					'print "<"+text.Mid( pos, 1 )+" "+text.Mid( pos, 1 )[0]
+					pos -= 1
+				Wend
+				local nEnd:int = pos+1	
+				while text.Mid( pos, 1 )[0] > 32 and text.Mid( pos, 1 )[0] <> 95 and text.Mid( pos, 1 ) <> "."
+					'print ">"+text.Mid( pos, 1 )+" "+text.Mid( pos, 1 )[0]
+					pos -= 1
+				wend
+				if text.Mid( pos, 1 ) = "." or text.Mid(pos, 1) = "~t" then pos += 1
+				local txt:string = text.Mid(pos, nEnd - pos)
+				'print ">"+txt+"<"
+				if txt.Left(7) <> " Lambda" then
+					output = txt
+				end if
+
+				showNext = false
 
 		end Select
 		
 		'print tags[istart]
 		select tags[istart]
-      case "function"
-        showNext = 1
+			case "function"
+				showNext = 1
         
-      case "class"
-        showNext = 2
+			case "class"
+				'print ">class"
+				showNext = 2
+			
+			case "method"
+				showStart = istart + 7
+				showNext = 3
+			
+			case "property"
+				showNext = 4
+			
+			case "field"
+				'print ">field"
+				showNext = 5
+			
+			case "global"
+				showNext = 6
+			
+			case "operator"
+				showNext = 7
+			
+			case "const"
+				showNext = 8
+			
+			case "enum"
+				showNext = 9
+			
+			case "struct"
+				'print "STRUCT"
+				showStart = istart + 7
+				showNext = 10
+		
+			case "lambda"
+				showNext = 11
 
-      case "method"
-        showStart = istart + 7
-        showNext = 3
-
-      case "property"
-        showNext = 4
-
-      case "field"
-        showNext = 5
-
-      case "global"
-        showNext = 6
-
-      case "operator"
-        showNext = 7
-
-      case "const"
-        showNext = 8
-
-      case "enum"
-        showNext = 9
-
-      case "struct"
-        showNext = 10
-
-
-		end select
+		end Select
 
 		
 		icolor = color
 		itag = tag
 		istart = start
 		
-'		print itag+" "+icolor
-	
 	Wend
 	
 	For Local i := istart Until eol
@@ -284,11 +425,11 @@ Function Mx2TextHighlighter:Int( text:String, colors:Byte[], tags:String[], sol:
 	Next
 	
 	if output <> "" Then
-    g_CodeText = output
+		g_CodeText = output
     'g_CodeKind = 1
     
 '    print output+" "+istart+" "+eol
-	end if
+	end If
 	
 	'print "<--end"
 	

@@ -12,7 +12,7 @@ Class Ted2Document
 
 
 	Method New( path:String )
-	_path=path
+	_path = path
 	End
 
 
@@ -24,7 +24,7 @@ Class Ted2Document
 
 	
 	Property View:View()
-		If Not _view _view=OnCreateView()
+		If Not _view then _view = OnCreateView()
 		
 		Return _view
 	End
@@ -34,9 +34,9 @@ Class Ted2Document
 	Property Dirty:Bool()
 		Return _dirty
 	Setter( dirty:Bool)
-		If dirty=_dirty Return
+		If dirty = _dirty then Return
 		
-		_dirty=dirty
+		_dirty = dirty
 		
 		DirtyChanged()
 	End
