@@ -12,6 +12,7 @@ Struct bbKeyInfo
 	Field keyCode:Int
 End
 
+#-
 Global bbKeyInfos:bbKeyInfo Ptr
 
 Public
@@ -213,7 +214,7 @@ Class KeyboardDevice Extends InputDevice
 		Reset()
 	End
 
-	Private
+Private
 	
 	Field _init:Bool
 	Field _modifiers:Modifier

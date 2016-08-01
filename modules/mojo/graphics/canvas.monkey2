@@ -789,6 +789,51 @@ Class Canvas
 		End
 	End
 
+	#rem monkeydoc Draws an image icon frame.
+	Draws an image using the current [[Color]], [[BlendMode]] and [[Matrix]].
+
+	@param tx X coordinate to draw image at.
+
+	@param ty Y coordinate to draw image at.
+
+	@param iconNumber number from 0 of the icon frame to draw (frames start from 0 and go left to right in equal pixel amounts).
+
+	@param iconCount how many icon frames are packed into the image
+
+	@param sx X axis scale factor for drawing.
+
+	@param sy Y axis scale factor for drawing.
+  #end
+  Method DrawImageIcon( image:Image, tx:Float, ty:Float, iconNumber:Int, iconCount:Int )
+    If iconCount < 0 Then Return
+    
+		Local vs:=image.Vertices
+		Local wd:Float = (vs.max.x - vs.min.x) / iconCount
+		vs.max.x = vs.min.x + wd
+
+		Local tc:=image.TexCoords
+		wd = (tc.max.x - tc.min.x) / iconCount
+		tc.min.x = tc.min.x + (iconNumber * wd)
+		tc.max.x = tc.min.x + wd
+		
+		AddDrawOp( image.Material,4,1 )
+		AddVertex( vs.min.x+tx, vs.min.y+ty,  tc.min.x, tc.min.y )
+		AddVertex( vs.max.x+tx, vs.min.y+ty,  tc.max.x, tc.min.y )
+		AddVertex( vs.max.x+tx, vs.max.y+ty,  tc.max.x, tc.max.y )
+		AddVertex( vs.min.x+tx, vs.max.y+ty,  tc.min.x, tc.max.y )
+	End
+
+  Method DrawImageIcon( image:Image, tx:Float, ty:Float, iconNumber:Int, iconCount:Int, sx:Float, sy:float )
+		Local matrix := _matrix
+		Translate( tx, ty )
+		Rotate( 0 )
+		Scale( sx, sy )
+		DrawImageIcon( image, 0,0, iconNumber, iconCount )
+		_matrix = matrix
+	End
+
+
+
 	#rem monkeydoc Draws an image.
 
 	Draws an image using the current [[Color]], [[BlendMode]] and [[Matrix]].
