@@ -837,7 +837,7 @@ Class MainWindowInstance Extends Window
 #If __HOSTOS__ = "macos"
 		_fileMenu.AddAction( _fileClose, NODEKIND_OSXCLOSE )
 #else		
-		_fileMenu.AddAction( _fileClose, NODEKIND_WINDOWCLOSE )
+		_fileMenu.AddAction( _fileClose, NODEKIND_WINDOWSCLOSE )
 #end		
 		_fileMenu.AddAction( _fileCloseAll )
 		_fileMenu.AddSeparator()
