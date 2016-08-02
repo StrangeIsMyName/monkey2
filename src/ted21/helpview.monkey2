@@ -58,18 +58,18 @@ Class HelpView Extends DockingView
 '		End
 
 
-		_actionFind = New Action( "find" )
+		_actionFind = New Action( "Search" )
 		_actionFind.Triggered = Lambda()
-			print "find "+_findField.Text
+			print "Search"+_findField.Text
 			UpdateMatches( _findField.Text )
 			If _matches.Length Go( _matches[0] )
 		End
 		_findButton = New Buttonx( _actionFind, "", 40, 40)
-		_findButton.ImageIcon = NODEKIND_FIND
+		_findButton.ImageButton = 3'NODEKIND_FIND
 		
 		
 		Local findBar := New DockingView
-		findBar.AddView( New Label( "  Find:" ), "left" )
+		findBar.AddView( New Label( "Search" ), "left" )
 		findBar.AddView( _findButton, "right" )
 		findBar.ContentView = _findField
 

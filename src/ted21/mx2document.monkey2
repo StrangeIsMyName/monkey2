@@ -153,10 +153,12 @@ Protected
 		Local color := canvas.Color
 	
 		Local clip:Recti
-		clip.min.x=-Frame.min.x
-		clip.min.y=-Frame.min.y
-		clip.max.x=clip.min.x+GutterWidth
-		clip.max.y=clip.min.y+ClipRect.Height
+		clip.min.x = -Frame.min.x
+		clip.min.y = -Frame.min.y
+		clip.max.x = clip.min.x+GutterWidth
+		clip.max.y = clip.min.y+ClipRect.Height
+		
+		local lineCount:int = Document.LineCount
 		
 		If _mx2Doc._errors.Length
 			canvas.Color = New Color( .5,0,0 )
@@ -168,7 +170,7 @@ Protected
 		
 		If _mx2Doc._debugLine <> -1
 			Local line := _mx2Doc._debugLine
-			If line < 0 Or line >= Document.LineCount Return
+			If line < 0 Or line >= lineCount Return
 			
 			canvas.Color = New Color( .7,.3,0 )
 			canvas.DrawRect( 0, line*LineHeight, Width, LineHeight )
@@ -193,7 +195,10 @@ Protected
 		canvas.Viewport = Rect
 		
 		Local line0 := clip.Top/LineHeight
-		Local line1 := (clip.Bottom-1)/LineHeight+1
+'		Local line1 := (clip.Bottom-1)/LineHeight+1
+
+		Local line1 := Min( (clip.Bottom-1)/LineHeight+1, Document.LineCount )
+
 		
 '		canvas.Color = New Color( .35, .35, .35 )
 '    If CursorRow = 0 Then
@@ -223,15 +228,17 @@ Protected
 				canvas.Color = Color.White
         canvas.DrawImageIcon( _icons, clip.X+16, i*LineHeight,  icn, 80 )
       end if  
-        
-      if GetDebugState( i ) then
-        canvas.Color = Color.White
-        canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGON, 80 )
-      else
-        canvas.Color = Color.Grey
-        canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGOFF, 80 )
-      end if
-
+      
+      if ln >= lineCount Then
+      else  
+				if GetDebugState( i ) then
+					canvas.Color = Color.White
+					canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGON, 80 )
+				else
+					canvas.Color = Color.Grey
+					canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGOFF, 80 )
+				end if
+			end if	
       'canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  10, 48 )
       
 		Next
@@ -289,10 +296,8 @@ Private
 
 	
 	Method OnKeyEvent( event:KeyEvent ) Override
-
 		Select event.Type
       Case EventType.KeyDown
-
         Select event.Key
 '          Case Key.Equals, Key.Comma
 '            AddSpace()

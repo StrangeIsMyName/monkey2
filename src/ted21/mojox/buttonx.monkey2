@@ -74,6 +74,14 @@ Class Buttonx Extends Label
 		_imageIcon = imageIcon
 	End
 
+
+
+	Property ImageButton:int()
+		Return _imageButton
+	Setter( imageButton:int )
+		_imageButton = imageButton
+	End
+
 	
 Protected
 
@@ -86,7 +94,9 @@ Protected
 	Field _height:Int = 32
 	
 	field _imageIcon:int = -1
+	field _imageButton:int = -1
 	Field _icons:Image
+	Field _buttons:Image
 	
 	Field _org:Vec2i
 	
@@ -106,9 +116,9 @@ Protected
     Endif
 
 
-    If _imageIcon > -1 then
+    If _imageButton > -1 then
 				canvas.Color = Color.White
-				canvas.DrawImageIcon( _icons, 4,7,  _imageIcon, 80,  1.8,1.8)
+				canvas.DrawImageIcon( _buttons, 2,7,  _imageButton, 24)
     end If
     
     if _live = false then Return
@@ -174,7 +184,7 @@ Protected
 
 	
 	method OnValidateStyle() Override
-			_icons = Style.GetImage( "node:icons" )
+		_buttons = Style.GetImage( "node:buttons" )
 	end Method
 	
 	

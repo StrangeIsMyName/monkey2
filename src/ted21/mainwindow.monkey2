@@ -904,7 +904,7 @@ Class MainWindowInstance Extends Window
 			local _fieldButton:Buttonx
 		 _fieldButton = New Buttonx( "", 40, 40)
 		 _fieldButton.Live = false
-		 _fieldButton.ImageIcon = NODEKIND_VLINE
+		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
 			_menuBar.AddView( _fieldButton,"left",30, false )
 
 		local _actionField:Action
@@ -913,7 +913,7 @@ Class MainWindowInstance Extends Window
 			OnFileNew()
 		end
    _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_NEW
+   _fieldButton.ImageButton = 7'NODEKIND_NEW
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
     _actionField = New Action( "method" )
@@ -921,7 +921,7 @@ Class MainWindowInstance Extends Window
 			OnFileOpen()
 		end
    _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_OPEN
+   _fieldButton.ImageButton = 4'NODEKIND_OPEN
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
     _actionField = New Action( "method" )
@@ -929,7 +929,7 @@ Class MainWindowInstance Extends Window
 			OnFileSave()
 		end
    _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_SAVE
+   _fieldButton.ImageButton = 5'NODEKIND_SAVE
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
     _actionField = New Action( "method" )
@@ -937,41 +937,41 @@ Class MainWindowInstance Extends Window
 			OnFileSaveAs()
 		end
    _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_SAVEAS
+   _fieldButton.ImageButton = 6'NODEKIND_SAVEAS
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
 		 _fieldButton = New Buttonx( "", 40, 40)
 		 _fieldButton.Live = false
-		 _fieldButton.ImageIcon = NODEKIND_VLINE
+		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
 			_menuBar.AddView( _fieldButton,"left",30, false )
 
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
-			OnEditUndo()
-		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_UNDO
-		_menuBar.AddView( _fieldButton,"left",40, false )
+'    _actionField = New Action( "method" )
+'    _actionField.Triggered = Lambda()
+'			OnEditUndo()
+'		end
+'   _fieldButton = New Buttonx( _actionField, "", 40, 40)
+'   _fieldButton.ImageIcon = NODEKIND_UNDO
+'		_menuBar.AddView( _fieldButton,"left",40, false )
 
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
-			OnEditRedo()
-		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_REDO
-		_menuBar.AddView( _fieldButton,"left",40, false )
+'    _actionField = New Action( "method" )
+'    _actionField.Triggered = Lambda()
+'			OnEditRedo()
+'		end
+'   _fieldButton = New Buttonx( _actionField, "", 40, 40)
+'   _fieldButton.ImageIcon = NODEKIND_REDO
+'		_menuBar.AddView( _fieldButton,"left",40, false )
 
-		 _fieldButton = New Buttonx( "", 40, 40)
-		 _fieldButton.Live = false
-		 _fieldButton.ImageIcon = NODEKIND_VLINE
-			_menuBar.AddView( _fieldButton,"left",30, false )
+'		 _fieldButton = New Buttonx( "", 40, 40)
+'		 _fieldButton.Live = false
+'		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
+'			_menuBar.AddView( _fieldButton,"left",30, false )
 
     _actionField = New Action( "method" )
     _actionField.Triggered = Lambda()
 			OnBuildRelease()
 		end
    _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_RUN
+   _fieldButton.ImageButton = 8'NODEKIND_RUN
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
     _actionField = New Action( "method" )
@@ -979,12 +979,12 @@ Class MainWindowInstance Extends Window
 			OnBuildDebug()
 		end
    _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_RUNDEBUG
+   _fieldButton.ImageButton = 9'NODEKIND_RUNDEBUG
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
 		 _fieldButton = New Buttonx( "", 40, 40)
 		 _fieldButton.Live = false
-		 _fieldButton.ImageIcon = NODEKIND_VLINE
+		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
 			_menuBar.AddView( _fieldButton,"left",30, false )
 
 
@@ -1000,7 +1000,7 @@ Class MainWindowInstance Extends Window
 			print "find "+_findField.Text
 		end
    _fieldButton = New Buttonx( _actionFind, "", 40, 40)
-   _fieldButton.ImageIcon = NODEKIND_FIND
+   _fieldButton.ImageButton = 3'NODEKIND_FIND
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
 

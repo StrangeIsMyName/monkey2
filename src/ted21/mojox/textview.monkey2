@@ -1283,7 +1283,9 @@ Class TextView Extends View
 		if p.y < 0 Return
 		
 		Local line := p.y / _charh
-		If line > _doc.LineCount Return
+		Local lastVisLine := Min( (ClipRect.Bottom-1)/_charh+1,_doc.LineCount )
+
+		If line >= _doc.LineCount-1 or line >= lastVisLine-1 Return
 		
 		'local min := _cursorMin( _anchor, _cursor )
 		'local max := Max( _cursor, 11 )
@@ -1604,17 +1606,17 @@ Protected
 			canvas.Color = _cursorColor
 			
 			If _blockCursor
-				canvas.DrawRect( _cursorRect.X,_cursorRect.Y,_cursorRect.Width,_cursorRect.Height )
+				canvas.DrawRect( _cursorRect.X-1,_cursorRect.Y-1,_cursorRect.Width+2,_cursorRect.Height+2 )
 			Else
-				canvas.DrawRect( _cursorRect.X-0,_cursorRect.Y,2,_cursorRect.Height )
-				canvas.DrawRect( _cursorRect.X-2,_cursorRect.Y,6,2 )
-				canvas.DrawRect( _cursorRect.X-2,_cursorRect.Y+_cursorRect.Height-2,6,2 )
+				canvas.DrawRect( _cursorRect.X-1,_cursorRect.Y-2,2,_cursorRect.Height+4 )
+'				canvas.DrawRect( _cursorRect.X-2,_cursorRect.Y,6,2 )
+'				canvas.DrawRect( _cursorRect.X-2,_cursorRect.Y+_cursorRect.Height-2,6,2 )
 			Endif
 			
 		Endif
 
 		_textColors[0] = Style.DefaultColor
-		local tabsize:int = _gutterw - 4
+		local tabsize:int = _gutterw
 		
 		local halfchar:int = _charh * 0.5
 		

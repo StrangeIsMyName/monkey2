@@ -187,6 +187,8 @@ Class ThemeInstance
 
 		style.SetImage( "node:icons", Image.Load( "asset::mojox/ui-icons.png" ) )
 
+		style.SetImage( "node:buttons", Image.Load( "asset::mojox/ui-buttons.png" ) )
+
 		Local icon2 := LoadIcons( "asset::mojox/ui-find.png",30 )
 		style.SetImage( "find:find",icon2[0] )
 

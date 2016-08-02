@@ -198,21 +198,21 @@ Protected
       DrawFrame( canvas, 4,4, 40,40)
       canvas.Color = Color.White
     endif
-		canvas.DrawImageIcon( _buttons, 8,8,   2, 8 )
+		canvas.DrawImageIcon( _buttons, 8,8,   2, 24 )
 		canvas.Color = Color.Grey
     If _over = 1 Then
       canvas.Color = SelectedColor
       DrawFrame( canvas, 4,44, 40,40)
       canvas.Color = Color.White
     endif
-		canvas.DrawImageIcon( _buttons, 8,32+16,   0, 8 )
+		canvas.DrawImageIcon( _buttons, 8,32+16,   0, 24 )
 		canvas.Color = Color.Grey
     If _over = 2 Then
       canvas.Color = SelectedColor
       DrawFrame( canvas, 4,84, 40,40)
       canvas.Color = Color.White
     endif
-		canvas.DrawImageIcon( _buttons, 8,64+24,   1, 8 )
+		canvas.DrawImageIcon( _buttons, 8,64+24,   1, 24 )
 		
 	End
 	

@@ -61,7 +61,7 @@ Class CodeView Extends DockingView
     End
    _methodButton = New Buttonx( _actionMethod, "", 40, 40)
    _methodButton.Selected = true
-   _methodButton.ImageIcon = NODEKIND_METHOD
+   _methodButton.ImageButton = 12'NODEKIND_METHOD
    
 
     _actionFunction = New Action( "function" )
@@ -74,7 +74,7 @@ Class CodeView Extends DockingView
     End
    _functionButton = New Buttonx( _actionFunction, "", 40, 40)
    _functionButton.Selected = true
-   _functionButton.ImageIcon = NODEKIND_FUNCTION
+   _functionButton.ImageButton = 13'NODEKIND_FUNCTION
 
     _actionField = New Action( "field" )
     _actionField.Triggered = Lambda()
@@ -86,7 +86,7 @@ Class CodeView Extends DockingView
     End
    _fieldButton = New Buttonx( _actionField, "", 40, 40)
    _fieldButton.Selected = true
-   _fieldButton.ImageIcon = NODEKIND_FIELD
+   _fieldButton.ImageButton = 14'NODEKIND_FIELD
 
     _actionProperty = New Action( "property" )
     _actionProperty.Triggered = Lambda()
@@ -98,7 +98,7 @@ Class CodeView Extends DockingView
     End
    _propertyButton = New Buttonx( _actionProperty, "", 40, 40)
    _propertyButton.Selected = true
-   _propertyButton.ImageIcon = NODEKIND_PROPERTY
+   _propertyButton.ImageButton = 15'NODEKIND_PROPERTY
 
     _actionLambda = New Action( "lambda" )
     _actionLambda.Triggered = Lambda()
@@ -107,7 +107,7 @@ Class CodeView Extends DockingView
     End
    _lambdaButton = New Buttonx( _actionLambda, "", 40, 40)
    _lambdaButton.Selected = true
-   _lambdaButton.ImageIcon = NODEKIND_LAMBDA
+   _lambdaButton.ImageButton = 11'NODEKIND_LAMBDA
 
 
 		Local findBar := New DockingView
