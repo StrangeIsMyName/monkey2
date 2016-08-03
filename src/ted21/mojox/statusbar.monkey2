@@ -71,25 +71,25 @@ Class StatusBar Extends Button
 
   Method EndDebug()
     If _display <> STATUSBAR_DEBUG Then return
-    print "EndDebug"
+    'print "EndDebug"
     _display = STATUSBAR_NORMAL
     _text = "Ready"
   End 
 
   
   Method SetNormal()
-    print "Debug"
+    'print "Debug"
     If _display = STATUSBAR_DEBUG Then Return
-    print " ok"
+    'print " ok"
    
     _display = STATUSBAR_NORMAL
   End 
 
 
   Method SetError(txt:String = "")
-    print "Error"
+    'print "Error"
     If _display = STATUSBAR_DEBUG Then Return
-    print " ok"
+    'print " ok"
     
     _display = STATUSBAR_ERROR
     _text = txt
@@ -98,9 +98,9 @@ Class StatusBar Extends Button
 
 
   Method SetRunning()
-    print "Running"
+    'print "Running"
     If _display = STATUSBAR_DEBUG Then Return
-    print " ok"
+    'print " ok"
     
     _display = STATUSBAR_RUNNING
   End 

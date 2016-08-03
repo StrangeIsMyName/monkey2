@@ -98,14 +98,14 @@ Class Mx2TextView Extends TextView
 		Local _editorColors:=New Color[15]
 		
 		Select Theme.Name
-      Case "light"
-        _editorColors[COLOR_IDENT]=New Color( .1,.1,.1 )
-        _editorColors[COLOR_KEYWORD]=New Color( 0,0,1 )
-        _editorColors[COLOR_STRING]=New Color( 0,.5,0 )
-        _editorColors[COLOR_NUMBER]=New Color( 0,0,.5 )
-        _editorColors[COLOR_COMMENT]=New Color( 0,.5,.5 )
-        _editorColors[COLOR_PREPROC]=New Color( .8,.65,0 )
-        _editorColors[COLOR_OTHER]=New Color( .1,.1,.1 )
+			Case "light"
+				_editorColors[COLOR_IDENT]=New Color( .1,.1,.1 )
+				_editorColors[COLOR_KEYWORD]=New Color( 0,0,1 )
+				_editorColors[COLOR_STRING]=New Color( 0,.5,0 )
+				_editorColors[COLOR_NUMBER]=New Color( 0,0,.5 )
+				_editorColors[COLOR_COMMENT]=New Color( 0,.5,.5 )
+				_editorColors[COLOR_PREPROC]=New Color( .8,.65,0 )
+				_editorColors[COLOR_OTHER]=New Color( .1,.1,.1 )
 				_editorColors[COLOR_FIELD]=New Color( 0,0,1 )
 				_editorColors[COLOR_METHOD]=New Color( 0,0,1 )
 				_editorColors[COLOR_FUNCTION]=New Color( 0,0,1 )
@@ -113,21 +113,21 @@ Class Mx2TextView Extends TextView
 				_editorColors[COLOR_PROPERTY]=New Color( 0,0,1 )
 				_editorColors[COLOR_STRUCT]=New Color( 0,0,1 )
 				_editorColors[COLOR_LAMBDA]=New Color( 0,0,1 )
-      Default
-        _editorColors[COLOR_IDENT]=New Color( .8,.8,.8 )
-        _editorColors[COLOR_KEYWORD]=New Color( .35,.5,.73 )
-        _editorColors[COLOR_STRING]=New Color( 1,.5,0.7 )
-        _editorColors[COLOR_NUMBER]=New Color( 0,.8,.6 )
-        _editorColors[COLOR_COMMENT]=New Color( .4,.5,.4 )
-        _editorColors[COLOR_PREPROC]=New Color( 1,.75,0 )
-        _editorColors[COLOR_OTHER]=New Color( 0,1,.5 )
-        _editorColors[COLOR_FIELD]=New Color( .32,.8,.31 )
-        _editorColors[COLOR_METHOD]=New Color( .25,.6,.82 )
-        _editorColors[COLOR_FUNCTION]=New Color( .61,.36,.72 )
-        _editorColors[COLOR_CLASS]=New Color( .61,.36,.72 )
-        _editorColors[COLOR_PROPERTY]=New Color( .89,.64,.17 )
-        _editorColors[COLOR_STRUCT]=New Color( .25,.6,.82 )
-        _editorColors[COLOR_LAMBDA]=New Color( .89,.64,.17 )
+			Default
+				_editorColors[COLOR_IDENT]=New Color( .7,.7,.7 )
+				_editorColors[COLOR_KEYWORD]=New Color( .35,.5,.73 )
+				_editorColors[COLOR_STRING]=New Color( .7, .5, .5 )
+				_editorColors[COLOR_NUMBER]=New Color( 0,.8,.6 )
+				_editorColors[COLOR_COMMENT]=New Color( .4,.5,.4 )
+				_editorColors[COLOR_PREPROC]=New Color( 1,.75,0 )
+				_editorColors[COLOR_OTHER]=New Color( 0,1,.5 )
+				_editorColors[COLOR_FIELD]=New Color( .32,.8,.31 )
+				_editorColors[COLOR_METHOD]=New Color( .25,.6,.82 )
+				_editorColors[COLOR_FUNCTION]=New Color( .61,.36,.72 )
+				_editorColors[COLOR_CLASS]=New Color( .61,.36,.72 )
+				_editorColors[COLOR_PROPERTY]=New Color( .89,.64,.17 )
+				_editorColors[COLOR_STRUCT]=New Color( .25,.6,.82 )
+				_editorColors[COLOR_LAMBDA]=New Color( .89,.64,.17 )
 		End
 		
 		TextColors=_editorColors
@@ -211,26 +211,26 @@ Protected
 		local icn:int
 
 		For Local i := line0 Until line1
-      ln = i + 1
-      If ln = CursorRow+1 Then
-        canvas.Color = New Color( 0.1,0.3,0.6, 1 )
-        canvas.DrawRect( 0, i*LineHeight, viewport.Width-8, LineHeight )
-        canvas.Color = Color.White
-        canvas.DrawText( String( ln ), clip.X+GutterWidth-8, i*LineHeight, 1, 0 )
-        canvas.Color = Color.Grey
-      else
-        canvas.DrawText( String( ln ), clip.X+GutterWidth-8, i*LineHeight, 1, 0 )
-      End If
-      
-      
-      icn = GetCodeIcon( i )
-      if icn > 0 then
+			ln = i + 1
+			If ln = CursorRow+1 Then
+				canvas.Color = New Color( 0.1,0.3,0.6, 1 )
+				canvas.DrawRect( 0, i*LineHeight, viewport.Width-8, LineHeight )
 				canvas.Color = Color.White
-        canvas.DrawImageIcon( _icons, clip.X+16, i*LineHeight,  icn, 80 )
-      end if  
-      
-      if ln >= lineCount Then
-      else  
+				canvas.DrawText( String( ln ), clip.X+GutterWidth-8, i*LineHeight, 1, 0 )
+				canvas.Color = Color.Grey
+			else
+				canvas.DrawText( String( ln ), clip.X+GutterWidth-8, i*LineHeight, 1, 0 )
+			End If
+			
+			
+			icn = GetCodeIcon( i )
+			if icn > 0 then
+				canvas.Color = Color.White
+				canvas.DrawImageIcon( _icons, clip.X+16, i*LineHeight,  icn, 80 )
+			end if  
+			
+			if ln >= lineCount Then
+			else  
 				if GetDebugState( i ) then
 					canvas.Color = Color.White
 					canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGON, 80 )
@@ -238,8 +238,8 @@ Protected
 					canvas.Color = Color.Grey
 					canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  NODEKIND_DEBUGOFF, 80 )
 				end if
-			end if	
-      'canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  10, 48 )
+		end if	
+		'canvas.DrawImageIcon( _icons, clip.X, i*LineHeight,  10, 48 )
       
 		Next
 	End
@@ -261,8 +261,8 @@ Private
 		Local state := Document.LineState( Document.FindLine( cursor ) )
 		If state <> -1 Return
 		
-    Insert( insert + " " )
- end Method
+		Insert( insert + " " )
+	 end Method
   
   
   
@@ -297,32 +297,32 @@ Private
 	
 	Method OnKeyEvent( event:KeyEvent ) Override
 		Select event.Type
-      Case EventType.KeyDown
-        Select event.Key
-'          Case Key.Equals, Key.Comma
-'            AddSpace()
-
-          Case Key.Tab, Key.Enter
-            Capitalize( True )
-
-          Case Key.Up, Key.Down
-            Capitalize( False )
-
-        End
-      
-      Case EventType.KeyChar
-        Select event.Key
-          Case Key.Equals
-            AddSpace( "=" )
-            return
-          case Key.Comma
-            AddSpace( "," )
-            return
-        end 
-
-        If Not IsIdent( event.Text[0] )
-          Capitalize( True )
-        Endif
+			Case EventType.KeyDown
+				Select event.Key
+				'          Case Key.Equals, Key.Comma
+				'           	 AddSpace()
+			
+					Case Key.Tab, Key.Enter
+						Capitalize( True )
+			
+					Case Key.Up, Key.Down
+						Capitalize( False )
+			
+				End
+			
+			Case EventType.KeyChar
+				Select event.Key
+					Case Key.Equals
+						AddSpace( "=" )
+						return
+					case Key.Comma
+						AddSpace( "," )
+						return
+				end 
+			
+				If Not IsIdent( event.Text[0] )
+					Capitalize( True )
+				Endif
 		End
 
 		Super.OnKeyEvent( event )
@@ -414,7 +414,7 @@ Class Mx2Document Extends Ted2Document
 Private
 
 	Field _textDoc:TextDocument
-	Field _errors:=New Stack<Mx2Error>
+	Field _errors := New Stack<Mx2Error>
 	Field _debugLine:Int=-1
 
 	Field _textView:TextView

@@ -178,13 +178,13 @@ Class document_container Extends litehtml.document_container
 
 	
 	Method set_color( canvas:Canvas,color:litehtml.web_color )
-		canvas.Color=New Color( color.red/255.0,color.green/255.0,color.blue/255.0,1 )
+		canvas.Color = New Color( color.red/255.0, color.green/255.0, color.blue/255.0,1 )
 	End
 
 
 	
 	Method make_url:String( href:String )
-		Return _view._baseUrl+href
+		Return _view._baseUrl + href
 	End
 
 
@@ -193,18 +193,18 @@ Class document_container Extends litehtml.document_container
 		Local font:Font
 		
 		If faceName.Contains( "monospace" )
-			font=Font.Open( App.DefaultMonoFontName,size )
+			font = Font.Open( App.DefaultMonoFontName,size )
 		Else
-			font=Font.Open( App.DefaultFontName,size )
+			font = Font.Open( App.DefaultFontName,size )
 		Endif
 		
-		Local height:=size
+		Local height := size
 
-		fm[0].height=height
-		fm[0].ascent=height
-		fm[0].descent=0
-		fm[0].x_height=height
-		fm[0].draw_spaces=True
+		fm[0].height = height
+		fm[0].ascent = height
+		fm[0].descent = 0
+		fm[0].x_height = height
+		fm[0].draw_spaces = True
 		
 		Return font
 	End

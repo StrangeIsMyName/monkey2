@@ -224,7 +224,7 @@ Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[]
 		end if
 		
 		select showNext
-			case 2,5
+			case 2,5 'class,  field
 				id = ""
 				local pos:int = start+6
 				while text.Mid( pos, 1 ) >= " "
@@ -232,7 +232,7 @@ Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[]
 					pos += 1
 				wend
 
-			case 10
+			case 10 'struct
 				id = ""
 				local pos:int = start+7
 				while text.Mid( pos, 1 ) >= " "
@@ -252,7 +252,7 @@ Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[]
 		
 		select showNext
 			case 1'function
-'        output = "Function:  " + tags[istart]
+				'output = "Function:  " + tags[istart]
 				output = tags[istart]
 				g_CodeKind = NODEKIND_FUNCTION
 				showNext = false
@@ -276,13 +276,13 @@ Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[]
 					id = text.Slice( showStart, start )
 				end if
             
-'        output = "Method:  " + id
+				'output = "Method:  " + id
 				output = id
 				g_CodeKind = NODEKIND_METHOD
 				showNext = false
 
 			case 4 'property
-'        output = "Property:  " + tags[istart]
+				'output = "Property:  " + tags[istart]
 				output = tags[istart]
 				g_CodeKind = NODEKIND_PROPERTY
 				showNext = false
@@ -297,13 +297,15 @@ Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[]
 				else
 					output = tags[istart]
 				end if
-        output = tags[istart]
-'        output = tags[istart]
+				output = tags[istart]
+				'        output = tags[istart]
 				g_CodeKind = NODEKIND_FIELD
 				showNext = false
+				
+'				print "field="+output
 
 			case 6 'global
-'        output =  "Global:  " + tags[istart]
+				'        output =  "Global:  " + tags[istart]
 				output = tags[istart]
 				g_CodeKind = NODEKIND_GLOBAL
 				showNext = false
@@ -315,19 +317,19 @@ Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[]
             
 				output = id
 
-'        output = "Operator:  " + tags[istart]
-'        output = tags[istart]
+				'        output = "Operator:  " + tags[istart]
+				'        output = tags[istart]
 				g_CodeKind = NODEKIND_OPERATOR
 				showNext = false
 
 			case 8 'const
-'        output =  "Const:  " + tags[istart]
+				'        output =  "Const:  " + tags[istart]
 				output = tags[istart]
 				g_CodeKind = NODEKIND_CONST
 				showNext = false
 
 			case 9 'enum
-'        output = "Enum:  " + tags[istart]
+				'        output = "Enum:  " + tags[istart]
 				output = tags[istart]
 				g_CodeKind = NODEKIND_ENUM
 				showNext = false
@@ -337,10 +339,10 @@ Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[]
 					id = text.Slice( showStart, start )
 				end if
             
-'        output = "Method:  " + id
+				'        output = "Method:  " + id
 				output = id
-'        output = "Struct:  " + tags[istart]
-'        output = tags[istart]
+				'        output = "Struct:  " + tags[istart]
+				'        output = tags[istart]
 				g_CodeKind = NODEKIND_STRUCT
 				showNext = false
 
@@ -429,12 +431,12 @@ Function Mx2TextHighlighter:Int( parent:TextDocument, text:String, colors:Byte[]
 		g_CodeText = output
 		g_CodeIcon = g_CodeKind
 				
-    'g_CodeKind = 1
+		'g_CodeKind = 1
     
-'    print output+" "+istart+" "+eol
+		'print output+" "+istart+" "+eol
 
-'    print output+" line="+parent.FindLine( istart )
-'		print Parent
+		'print output+" line="+parent.FindLine( istart )
+		'print Parent
 	end If
 	
 	'print "<--end"

@@ -365,7 +365,7 @@ Class TextDocument
 				
 				if g_CodeKind > -1 Then
 					'print "1>"+GetLineTabs(line)
-					'print "1 "+line+" "+g_CodeText+" "+g_CodeKind
+'					print "A   line="+line+" "+g_CodeText+" kind="+g_CodeKind+" index="+Code.IndexCount
 
 					jumpline = Code.IndexCount'line
 					Code.AddNode( g_CodeText, g_CodeKind, line, GetLineTabs(line) )
@@ -378,6 +378,7 @@ Class TextDocument
 			Next
 
 			jumpline = line
+'			local changed:int = false
 			While line < _lines.Length 'And state<>_lines[line].state
 				state = _highlighter( self, _text, _colors.Data, _tags.Data, StartOfLine( line ), EndOfLine( line ), state )
 				_lines.Data[line].state = state
@@ -388,17 +389,22 @@ Class TextDocument
 				if g_CodeKind > -1 Then
 					'print "2>"+GetLineTabs(line)
 					
-					'print "2 "+line+" "+g_CodeText+" "+g_CodeKind
+'					print "B   line="+line+" "+g_CodeText+" kind="+g_CodeKind+" index="+Code.IndexCount
 
 					jumpline = Code.IndexCount'line
 					Code.AddNode( g_CodeText, g_CodeKind, line, GetLineTabs(line) )
 					_lines.Data[line].icon = g_CodeIcon
+'					changed = true
 				Endif
 
 				_lines.Data[line].line = jumpline
 				
 				line += 1
-			End
+			Wend
+'			if changed Then
+'				print "changed"
+'				Code.ModifyKind( null, NODEKIND_FUNCTION, true )
+'			end if
 		Endif
 		
 '		Print "lines="+_lines.Length+", chars="+_text.Length
@@ -656,7 +662,7 @@ Class TextView Extends View
 	
 		Style = Style.GetStyle( "mojo.TextView" )
 
-    _doc = New TextDocument
+		_doc = New TextDocument
 		
 		
 '		_textColors=New Color[]( New Color( 0,0,0,1 ),New Color( 0,0,.5,1 ),New Color( 0,.5,0,1 ),New Color( .5,0,0,1 ),New Color( .5,0,.5,1 ) )
@@ -1167,10 +1173,10 @@ Class TextView Extends View
   
 
 	Method GotoLine( line:int, txt:string = "")
-'    print "gotoline "+line
+		'    print "gotoline "+line
     
-    local showLine:int = line + 20
-    if showLine > _doc.LineCount then showLine = _doc.LineCount
+		local showLine:int = line + 20
+		if showLine > _doc.LineCount then showLine = _doc.LineCount
 
 		local row:int = 0
 		if txt <> "" then
@@ -1187,7 +1193,7 @@ Class TextView Extends View
 		_cursor = _doc.StartOfLine( line ) + row
 		_anchor = _cursor
 		UpdateCursor()
-  end Method
+	  end Method
   
   
   
@@ -1919,10 +1925,10 @@ Protected
             
 						Endif
             
+#If __HOSTOS__="macos"          
 					Case Key.Left
 						'ctrl = prev space
 						'alt = start of line
-          
 						if _alt or control Then
 							_cursor = _doc.StartOfLine( Row( _cursor ) )
 							UpdateCursor()
@@ -1956,7 +1962,60 @@ Protected
 								Endif
 							endif
 						endif
+#Else
+					Case Key.Left
+						'ctrl = prev space
+						'alt = start of line
+						if _control or control Then
+							_cursor = _doc.StartOfLine( Row( _cursor ) )
+							UpdateCursor()
+						Else
+							if _alt Then
+								PrevWord( Row( _cursor ) )
+								UpdateCursor()
+							Else
+								If _cursor 
+									_cursor -= 1
+									UpdateCursor()
+								Endif
+							end if
+						end if
             
+					Case Key.Right
+						'ctrl = next space
+						'alt = end of line
+          
+						if _control or control Then
+							_cursor = _doc.EndOfLine( Row( _cursor ) )
+							UpdateCursor()
+						else
+							if _alt Then
+								NextWord( Row( _cursor ) )
+								UpdateCursor()
+							Else
+								If _cursor < _doc.Text.Length
+									_cursor += 1
+									UpdateCursor()
+								Endif
+							endif
+						endif
+#end            
+					Case Key.Up
+						If control Then
+							_cursor = 0
+							UpdateCursor()
+						Else
+							MoveLine( -1 )
+						End If
+          
+					Case Key.Down
+						If control Then
+							_cursor = _doc.TextLength
+							UpdateCursor()
+						Else
+							MoveLine( 1 )
+						End if
+						
 					Case Key.Home
 						'print "home"
 						If control
@@ -1977,12 +2036,6 @@ Protected
             
 						UpdateCursor()
 
-					Case Key.Up
-						MoveLine( -1 )
-          
-					Case Key.Down
-						MoveLine( 1 )
-            
 					Case Key.PageUp
 						if _control Then
 							_cursor = 0

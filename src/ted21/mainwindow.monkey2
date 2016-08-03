@@ -728,7 +728,7 @@ Class MainWindowInstance Extends Window
 		_buildRelease.Triggered=OnBuildRelease
 		
 		_buildForceStop=New Action( "Force Stop" )
-		_buildForceStop.HotKey=Key.F5
+		_buildForceStop.HotKey=Key.Escape
 		_buildForceStop.HotKeyModifiers=Modifier.Shift
 		_buildForceStop.Triggered=OnBuildForceStop
 
@@ -772,7 +772,7 @@ Class MainWindowInstance Extends Window
 	
 	
 	Method InitMenus()
-		_newFiles = New Menu( "New..." )
+		_newFiles = New Menu( "New" )
 		Local p := AssetsDir()+"ted2/newfiles/"
 		For Local f := Eachin LoadDir( p )
 			print f
@@ -810,7 +810,7 @@ Class MainWindowInstance Extends Window
 			Next
 		Endif
 
-		_scripts = New Menu( "Scripts..." )
+		_scripts = New Menu( "Scripts" )
 		'Local obj:=JsonObject.Load( "asset::ted2/scripts.json" )
 		If obj
 			For Local obj2 := Eachin obj["scripts"].ToArray()
@@ -823,9 +823,9 @@ Class MainWindowInstance Extends Window
 			Next
 		Endif
 		
-		_recentFiles = New Menu( "Recent Files..." )
+		_recentFiles = New Menu( "Recent Files" )
 		
-		_closeProject = New Menu( "Close Project..." )
+		_closeProject = New Menu( "Close Project" )
 		
 		_fileMenu = New Menu( "File" )
 		_fileMenu.AddAction( _fileNew, NODEKIND_NEW )
@@ -863,7 +863,7 @@ Class MainWindowInstance Extends Window
 		_editMenu.AddSeparator()
 		_editMenu.AddAction( _editSelectAll )
 		_editMenu.AddSeparator()
-		_editMenu.AddAction( _editFind )
+		_editMenu.AddAction( _editFind, NODEKIND_FIND )
 		_editMenu.AddAction( _findNext )
 		_editMenu.AddAction( _findPrevious )
 		_editMenu.AddAction( _findReplace )
@@ -875,14 +875,14 @@ Class MainWindowInstance Extends Window
 		_buildMenu.AddSeparator()
 		_buildMenu.AddAction( _buildNextError )
 		_buildMenu.AddSeparator()
-		_buildMenu.AddAction( _buildLockFile )
+		_buildMenu.AddAction( _buildLockFile, NODEKIND_LOCK )
 		_buildMenu.AddSeparator()
 		_buildMenu.AddSubMenu( _scripts )
 		_buildMenu.AddSeparator()
 		_buildMenu.AddAction( _buildForceStop )
 		
 		_helpMenu=New Menu( "Help" )
-		_helpMenu.AddAction( _helpOnlineHelp )
+		_helpMenu.AddAction( _helpOnlineHelp, NODEKIND_HELPONLINE )
 		_helpMenu.AddAction( _helpOfflineHelp, NODEKIND_HELPBOOKS )
 		_helpMenu.AddSeparator()
 		_helpMenu.AddAction( _helpAbout, NODEKIND_HELP )
@@ -982,6 +982,14 @@ Class MainWindowInstance Extends Window
    _fieldButton.ImageButton = 9'NODEKIND_RUNDEBUG
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
+    _actionField = New Action( "method" )
+    _actionField.Triggered = Lambda()
+			OnBuildForceStop()
+		end
+   _fieldButton = New Buttonx( _actionField, "", 40, 40)
+   _fieldButton.ImageButton = 17'NODEKIND_SAVEAS
+		_menuBar.AddView( _fieldButton,"left",40, false )
+
 		 _fieldButton = New Buttonx( "", 40, 40)
 		 _fieldButton.Live = false
 		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
@@ -1003,6 +1011,13 @@ Class MainWindowInstance Extends Window
    _fieldButton.ImageButton = 3'NODEKIND_FIND
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
+    _actionFind = New Action( "prefs" )
+    _actionFind.Triggered = Lambda()
+			print "prefs "
+		end
+   _fieldButton = New Buttonx( _actionFind, "", 40, 40)
+   _fieldButton.ImageButton = 16'NODEKIND_FIND
+		_menuBar.AddView( _fieldButton,"right",40, false )
 
 	End
 
@@ -1029,9 +1044,7 @@ Class MainWindowInstance Extends Window
 		_codeView.LambdaClicked = Lambda( )
 			_currentTextView.Document.Code.ModifyKind( null, NODEKIND_LAMBDA, _codeView.LambdaState )
 		end	
-'    _codeView.NodeClicked = Lambda( node:Node, event:MouseEvent )
-'      print "clicked"'
-'    End
+
 
     
 		_debugView = New DebugView
@@ -1044,14 +1057,23 @@ Class MainWindowInstance Extends Window
 		_browser.AddTab( "Help", _helpView )
 		_browser.CurrentView = _projectView
 		_browser.CurrentChanged = Lambda()
-      'print "browser changed"
-			if _browser.CurrentView = _codeView Then
-        'print "CODE VIEW"
-        
-        '_codeView._docker.ContentView
-        
-        
-			end if
+		'print "browser changed"
+		select _browser.CurrentView
+			case _helpView
+				print "helpview"
+				_console.Visible = false
+					
+			default
+'				if _browser.PreviousView = _helpView Then
+'				end if
+		end select
+'			if _browser.CurrentView = _codeView Then
+				'print "CODE VIEW"
+				
+				'_codeView._docker.ContentView
+				
+		
+'			end if
 		end 
 		
 		
@@ -1075,7 +1097,7 @@ Class MainWindowInstance Extends Window
 		_docTabber.CurrentChanged = Lambda()
 			'print "document changed"
 			Local closeDoc:Bool = _docTabber.GetMouseX > 0
-'      print closeDoc
+			'      print closeDoc
 
 			MakeCurrent( FindDocument( _docTabber.CurrentView ) )
 

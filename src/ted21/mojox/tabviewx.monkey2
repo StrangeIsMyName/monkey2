@@ -182,7 +182,6 @@ Class TabViewX Extends View
 	Property CurrentIndex:Int()
 		If _current Return IndexOfView( _current.View )
 		Return -1
-		
 	Setter( currentIndex:Int )
 		MakeCurrent( _tabs[currentIndex] )
 	End
@@ -192,7 +191,6 @@ Class TabViewX Extends View
 	Property CurrentView:View()
 		If _current Return _current.View
 		Return Null
-	
 	Setter( currentView:View )
 		For Local tab:=Eachin _tabs
 			If tab.View<>currentView Continue
@@ -210,26 +208,26 @@ Class TabViewX Extends View
 
 
 	Method IndexOfView:Int( view:View )
-		For Local i:=0 Until _tabs.Length
-			If _tabs[i].View=view Return i
+		For Local i := 0 Until _tabs.Length
+			If _tabs[i].View = view Return i
 		Next
 		Return -1
 	End
 
 
 
-	Method AddTab:Int( text:String,view:View,makeCurrent:Bool=False )
-		Local index:=_tabs.Length
+	Method AddTab:Int( text:String, view:View, makeCurrent:Bool = False )
+		Local index := _tabs.Length
 
-		Local tab := New TabButtonX( text,view )
-		tab.Clicked=Lambda()
+		Local tab := New TabButtonX( text, view )
+		tab.Clicked = Lambda()
 			MakeCurrent( tab )
 		End
 		_tabs.Add( tab )
 
 		AddChild( tab )
 
-		If makeCurrent MakeCurrent( tab )
+		If makeCurrent then MakeCurrent( tab )
 
 		Return index
 	End
@@ -281,6 +279,7 @@ Private
 	Field _tabs := New Stack<TabButtonX>
 	
 	Field _current:TabButtonX
+	Field _previous:TabButtonX
 	
 	Field _buttonsSize:Vec2i
 
@@ -292,14 +291,14 @@ Private
 '		If tab = _current Return
 		
 		If _current 
-			_current.Selected=False
+			_current.Selected = False
 			RemoveChild( _current.View.Container )
 		Endif
 
-		_current=tab
+		_current = tab
 
 		If _current
-			_current.Selected=True
+			_current.Selected = True
 			AddChild( _current.View.Container )
 		Endif
 		
@@ -353,11 +352,11 @@ Private
 		Local x := 0
 		
 		For Local tab := Eachin _tabs
-			tab.Frame = New Recti( x,0,x+tab.LayoutSize.x,_buttonsSize.y )
-			x+=tab.LayoutSize.x
+			tab.Frame = New Recti( x, 0, x+tab.LayoutSize.x, _buttonsSize.y )
+			x += tab.LayoutSize.x
 		Next
 		
-		If _current _current.View.Container.Frame = New Recti( 0,_buttonsSize.y,Width,Height )
+		If _current then _current.View.Container.Frame = New Recti( 0, _buttonsSize.y, Width, Height )
 	End
 	
 End

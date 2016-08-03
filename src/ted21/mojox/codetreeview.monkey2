@@ -48,11 +48,11 @@ Class CodeTreeView Extends View
 				parent.AddChild( Self, index )
 			end if
 			
-			Label = label
-			Kind = kind
-			Line = line
-			Indent = indent * 16
-			Hidden = false
+			_label = label
+			_kind = kind
+			_line = line
+			_indent = indent * 16
+			_hidden = false
 			
 '			if kind = NODEKIND_FIELD then
 '				Hidden = true
@@ -297,6 +297,31 @@ Class CodeTreeView Extends View
 	
 	
 	
+	Method AddNodeToEnd( label:String, kind:Int, line:Int, indent:int )
+		new Node( label, kind, _rootNode, _indexCount, line, indent )
+	end method
+	
+	
+	
+	Method AddNode( label:String, kind:Int, line:Int, indent:int )
+'    print _indexCount
+    
+		local tmp:Node = new Node( label, kind, _rootNode, _indexCount, line, indent )
+'    tmp.Label = "bum"
+		'if kind = NODEKIND_FIELD then tmp.Hidden = true
+
+		if _indexCount = 0 then
+			_rootNode.Label = "<code>"
+			_rootNode.Kind = NODEKIND_APP			
+			_rootNode._expanded = true
+		end if
+
+		_indexCount += 1
+
+	end method
+
+	
+	
 	method RemoveAllChildren()
 		_rootNode.RemoveAllChildren()
 	end method
@@ -351,10 +376,14 @@ Class CodeTreeView Extends View
 
 	method ModifyKind( node:Node, kind:int, show:bool )
 		if not node then node = RootNode
+
+'		print "Modify Kind="+kind
 		
 		if show then
+'			print "show"
 			UnhideKind( node, kind )
 		Else
+'			print "hide"
 			HideKind( node, kind )
 		end If
 
@@ -388,29 +417,6 @@ Class CodeTreeView Extends View
 
 
 
-	Method AddNodeToEnd( label:String, kind:Int, line:Int, indent:int )
-		new Node( label, kind, _rootNode, _indexCount, line, indent )
-	end method
-	
-	Method AddNode( label:String, kind:Int, line:Int, indent:int )
-'    print _indexCount
-    
-		local tmp:Node = new Node( label, kind, _rootNode, _indexCount, line, indent )
-'    tmp.Label = "bum"
-		if kind = NODEKIND_FIELD then tmp.Hidden = true
-
-		if _indexCount = 0 then
-			_rootNode.Label = "<code>"
-			_rootNode.Kind = NODEKIND_APP			
-			_rootNode._expanded = true
-		end if
-
-		_indexCount += 1
-
-	end method
-
-	
-	
 	Property RootNode:Node()
 		Return _rootNode
 	Setter( node:Node)
@@ -548,7 +554,7 @@ Class CodeTreeView Extends View
 	Method RenderNode( canvas:Canvas, node:Node )
 		If Not node._bounds.Intersects( ClipRect ) Then return
 		
-		if node._hidden then return
+'		if node._hidden then return
 	
 		If _rootNodeVisible Or node <>_rootNode then
 		
@@ -610,7 +616,7 @@ Class CodeTreeView Extends View
 '			canvas.DrawText( node._label, node._rect.X+_nodeSize+50, node._rect.Y )
 
 			canvas.DrawText( node._label, node._rect.X + _nodeSize + 25 + xt, node._rect.Y )
-
+'			if node._hidden then canvas.DrawText( "H", node._rect.X + _nodeSize + 16 + xt, node._rect.Y )
 
 '			canvas.DrawText( node._label+"  "+node._line, node._rect.X + _nodeSize + 25, node._rect.Y )
 		

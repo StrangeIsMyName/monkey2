@@ -2,6 +2,11 @@
 Namespace mojox
 
 
+global g_MenuLevel:int = 0
+global g_MenuTop:int
+global g_MenuLeft:int
+global g_MenuRight:int
+global g_MenuBottom:int
 
 
 Class MenuButton Extends Button
@@ -135,6 +140,26 @@ Class Menu Extends DockingView
 	Method AddAction( action:Action, imageIndex:int = -1 )
 		Local button := New MenuButton( action, imageIndex )
 		button._imageIcon =  imageIndex
+		button.Over = Lambda()
+			if button.Hover Then
+'				print "entry hover"
+'				If Not menu.Visible
+'					g_MenuLevel = 2
+'					print "submenu open level="+g_MenuLevel
+'					Local location := New Vec2i( button.Bounds.Right, button.Bounds.Top )
+'					menu.Open( location, button, Self )
+'
+'				end if
+			Else
+'				print "entry off"
+'				If button.Visible
+'					print "sub exit"
+'					menu.Close()
+					'Return
+'				Endif
+				'print "off"
+			end if
+		end
 		button.Clicked += Lambda()
 			_open[0].Close()
 		End
@@ -158,18 +183,24 @@ Class Menu Extends DockingView
 
 	
 	Method AddSubMenu( menu:Menu )
+'		print "submenu="+menu.Label
+		
 		Local label := New MenuButton( menu.Label )
 		label._subMenu = true
 
 		label.Over = Lambda()
 			if label.Hover Then
-				'print "hover"
+'				print "submenu hover"
 				If Not menu.Visible
+					g_MenuLevel = 2
+'					print "submenu open level="+g_MenuLevel
 					Local location := New Vec2i( label.Bounds.Right, label.Bounds.Top )
 					menu.Open( location, label, Self )
+
 				end if
 			Else
-				If menu.Visible
+				If label.Visible
+'					print "sub exit"
 					'menu.Close()
 					'Return
 				Endif
@@ -292,14 +323,20 @@ Class MenuBar Extends DockingView
 		
 		label.Over = Lambda()
 			if label.Hover Then
-				'print "hover"
 				If Not menu.Visible
-					Local location := New Vec2i( label.Bounds.Left, label.Bounds.Bottom )
+					g_MenuLevel = 1
+					Local location := New Vec2i( label.Bounds.Left, label.Bounds.Bottom-2 )
+					
+'					print "menu "+label.Text+" open level="+g_MenuLevel+" x="+label.Bounds.Left+" "+(label.Bounds.Bottom-2)
+					
+					
 					menu.Open( location, label, Self )
 				end if
 			Else
 				If menu.Visible
-					'menu.Close()
+					if Mouse.Y < label.Bounds.Bottom then menu.Close()
+					'print "menu close mousey="+Mouse.Y+" height="+label.Bounds.Bottom
+'					menu.Close()
 					'Return
 				Endif
 				'print "off"
