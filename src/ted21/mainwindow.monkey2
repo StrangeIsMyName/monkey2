@@ -65,6 +65,10 @@ Class MainWindowInstance Extends Window
 	Field _findPrevious:Action
 	Field _findReplace:Action
 	Field _findReplaceAll:Action
+	Field _findUseBigCursor:Action
+	Field _findShowInvisibles:Action
+	Field _showInvisibles:bool = true
+	Field _showBigCursor:bool = true
 	
 	Field _escape:Action
 	Field _cmdEscape:Action
@@ -365,9 +369,9 @@ Class MainWindowInstance Extends Window
 
 
 	Method OnQuickHelp()
-		local tag := _currentTextView.TagUnderCursor()
-		_browser.CurrentView = _helpView
-		_helpView.Find( tag )
+'		local tag := _currentTextView.TagUnderCursor()
+'		_browser.CurrentView = _helpView
+'		_helpView.Find( tag )
 	End
 
 
@@ -571,6 +575,34 @@ Class MainWindowInstance Extends Window
 	End
 
 
+
+	method OnFindUseBigCursor()
+		_showBigCursor = not _showBigCursor
+
+		If _currentDoc then
+			_currentTextView = Cast<TextView>( _currentDoc.View )
+      
+			If _currentTextView Then
+				_currentTextView.BlockCursor = _showBigCursor
+			end If
+		end If
+	end Method
+	
+
+
+	method OnFindShowInvisibles()
+		_showInvisibles = not _showInvisibles
+
+		If _currentDoc then
+			_currentTextView = Cast<TextView>( _currentDoc.View )
+      
+			If _currentTextView Then
+				_currentTextView.ShowInvisibles = _showInvisibles
+			end If
+		end If
+	end method
+	
+	
 	
 	Method OnEscape()
 		If _findDialog.Visible then
@@ -713,6 +745,18 @@ Class MainWindowInstance Extends Window
 		_findReplaceAll=New Action( "Replace All" )
 		_findReplaceAll.Triggered=OnFindReplaceAll
 
+		_findShowInvisibles=New Action( "Show tabs and Returns" )
+		_findShowInvisibles.HotKey=Key.T
+		_findShowInvisibles.HotKeyModifiers = _modifier
+		_findShowInvisibles.Triggered=OnFindShowInvisibles
+
+		_findUseBigCursor=New Action( "Use Big Cursor" )
+		_findUseBigCursor.HotKey=Key.B
+		_findUseBigCursor.HotKeyModifiers = _modifier
+		_findUseBigCursor.Triggered=OnFindUseBigCursor
+
+
+
 		_editSearch=New Action( "Search" )
 		_editSearch.HotKey=Key.F
 		_editSearch.HotKeyModifiers = _modifier | Modifier.Shift
@@ -743,7 +787,7 @@ Class MainWindowInstance Extends Window
 		
 		_quickHelp=New Action( "Quick Help" )
 		_quickHelp.HotKey=Key.F1
-		_quickHelp.Triggered=OnQuickHelp
+		_quickHelp.Triggered = OnQuickHelp
 
 		_helpOnlineHelp=New Action( "Online Help" )
 		_helpOnlineHelp.Triggered=OnHelpOnlineHelp
@@ -868,6 +912,9 @@ Class MainWindowInstance Extends Window
 		_editMenu.AddAction( _findPrevious )
 		_editMenu.AddAction( _findReplace )
 		_editMenu.AddAction( _findReplaceAll )
+		_editMenu.AddSeparator()
+		_editMenu.AddAction( _findShowInvisibles )
+		_editMenu.AddAction( _findUseBigCursor )
 		
 		_buildMenu=New Menu( "Build" )
 		_buildMenu.AddAction( _buildDebug, NODEKIND_RUNDEBUG )
@@ -1058,12 +1105,31 @@ Class MainWindowInstance Extends Window
 		_browser.CurrentView = _projectView
 		_browser.CurrentChanged = Lambda()
 		'print "browser changed"
+
+
+
+
+
+
+
 		select _browser.CurrentView
 			case _helpView
 				print "helpview"
 				_console.Visible = false
+				_docTabber.Visible = false
+				
 					
 			default
+				_docTabber.Visible = true
+
+				_currentTextView = Null
+				If _currentDoc then
+					_currentTextView = Cast<TextView>( _currentDoc.View )
+					
+					If _currentTextView Then
+						if _showConsole then _console.Visible = true
+					endif
+				end if
 '				if _browser.PreviousView = _helpView Then
 '				end if
 		end select
@@ -1221,6 +1287,13 @@ Class MainWindowInstance Extends Window
 			_codeView.PropertyState = obj["codeProperty"].ToBool()
 		Endif
 
+		If obj.Contains( "showInvisibles" )
+			_showInvisibles = obj["showInvisibles"].ToBool()
+		Endif
+		If obj.Contains( "showBigCursor" )
+			_showBigCursor = obj["showBigCursor"].ToBool()
+		Endif
+
 		If obj.Contains( "openDocuments" )
 			For Local doc := Eachin obj["openDocuments"].ToArray()
 				Local path := doc.ToString()
@@ -1310,6 +1383,9 @@ Class MainWindowInstance Extends Window
 		obj["windowRect"] = ToJson( Frame )
 		
 		obj["colorPanel"] = New JsonNumber( _colorView.Visible )
+
+		obj["showInvisibles"] = New JsonNumber( _showInvisibles )
+		obj["showBigCursor"] = New JsonNumber( _showBigCursor )
 
 		obj["consoleSize"] = New JsonNumber( _docker.GetViewSize( _console ) )
 		
@@ -1459,6 +1535,9 @@ Class MainWindowInstance Extends Window
 			If _currentTextView Then
       'print "here"
 				_codeView.ContentView = _currentTextView.Document.Code
+				
+				_currentTextView.BlockCursor = _showBigCursor
+				_currentTextView.ShowInvisibles = _showInvisibles
 
 				_statusbar.SetCursor( _currentTextView.Document.CursorLine, _currentTextView.Document.CursorColumn, _currentTextView.Document.CursorChar )
 				_currentTextView.Document.SelectedIndex = _currentTextView.Document.CursorCodeLine

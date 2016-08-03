@@ -98,9 +98,8 @@ Class HelpView Extends DockingView
 		
 		AddView( findBar, "top", 40, false )
 		
-		AddView( _helpTree, "top" )
-		ContentView = null
-'		ContentView = New ScrollView( _htmlView )
+		AddView( _helpTree, "top", 128 )
+		ContentView = New ScrollView( _htmlView )
 	End
 
 

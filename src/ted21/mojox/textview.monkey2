@@ -743,6 +743,14 @@ Class TextView Extends View
 
 
 
+	Property ShowInvisibles:Bool()
+		Return _showInvisibles
+	Setter( showInvisibles:Bool )
+		_showInvisibles = showInvisibles
+	End
+
+
+
 	Property Text:String()
 		Return _doc.Text
 	Setter( text:String )
@@ -1368,6 +1376,7 @@ Private
 	Field _cursorColor:Color = New Color( 0.1,0.3,0.6, 1 )
 	Field _selColor:Color = New Color( 1,1,1,.25 )
 	Field _blockCursor:Bool = True
+	Field _showInvisibles:Bool = True
 	
 	Field _textColors:Color[]
 
@@ -1657,11 +1666,11 @@ Protected
 				
 				if i1 <= i0 Then
         
-					if text.Left(1) = "~t" then
-						if _doc._showHidden then
+					if text.Left(1) = "~t" and _showInvisibles then
+'						if _doc._showHidden then
 							canvas.Color = Color.LightGrey
 							canvas.DrawImageIcon( _icons, x + tabsize, y,  NODEKIND_TAB, 80 )
-						end if
+'						end if
 					endif
 					
 				else
@@ -1711,7 +1720,7 @@ Protected
 			
 			Wend
 
-			if _doc._showHidden then
+			if _showInvisibles then'_doc._showHidden then
 				canvas.Color = Color.LightGrey
 				canvas.DrawImageIcon( _icons, x + tabsize, y,  NODEKIND_RETURN, 80 )
 			endif
