@@ -554,7 +554,7 @@ Class CodeTreeView Extends View
 	Method RenderNode( canvas:Canvas, node:Node )
 		If Not node._bounds.Intersects( ClipRect ) Then return
 		
-'		if node._hidden then return
+		if node._hidden then return
 	
 		If _rootNodeVisible Or node <>_rootNode then
 		

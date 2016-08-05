@@ -1,24 +1,4 @@
 
-/*! Tweaked version of milligram!
-
- * Milligram v1.1.0
- * http://milligram.github.io
- *
- * Copyright (c) 2016 CJ Patoilo
- * Licensed under the MIT license
-
-*/
-
-/* ***** color ***** */
-
-/*
-$color-initial: #fcfcfc !default
-$color-primary: #9b4dca !default
-$color-secondary: #606c76 !default
-$color-tertiary: #f4f5f6 !default
-$color-quaternary: #d1d1d1 !default
-*/
-
 /* ***** base ***** */
 
 html{
@@ -32,11 +12,11 @@ html{
 }
 
 body{
-	background: #fcfcfc;
-	color: #404c56;	/* $color-secondary */
+	background: #b4c0cc;
+	color: #303030;	/* $color-secondary */
 	font-family: "Roboto", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 	font-size: 16px;
-	line-height: 140%;
+	line-height: 80%;
 	padding:0;
 	border:0;
 	margin:0;
@@ -53,211 +33,13 @@ blockquote {
 	box-sizing: inherit;
 }
 
-/* ***** gadegets ***** */
 
-.button,
-button,
-input[type='button'],
-input[type='reset'],
-input[type='submit'] {
-  background-color: #9b4dca;
-  border: 1px solid #9b4dca;
-  border-radius: 3px;
-  color: #fcfcfc;
-  cursor: pointer;
-  display: inline-block;
-  text-align: center;
-  text-decoration: none;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.button:hover, .button:focus,
-button:hover,
-button:focus,
-input[type='button']:hover,
-input[type='button']:focus,
-input[type='reset']:hover,
-input[type='reset']:focus,
-input[type='submit']:hover,
-input[type='submit']:focus {
-  background-color: #606c76;
-  border-color: #606c76;
-  color: #fcfcfc;
-  outline: 0;
-}
-.button.button-disabled, .button[disabled],
-button.button-disabled,
-button[disabled],
-input[type='button'].button-disabled,
-input[type='button'][disabled],
-input[type='reset'].button-disabled,
-input[type='reset'][disabled],
-input[type='submit'].button-disabled,
-input[type='submit'][disabled] {
-  opacity: 0.5;
-  cursor: default;
-}
-.button.button-disabled:hover, .button.button-disabled:focus, .button[disabled]:hover, .button[disabled]:focus,
-button.button-disabled:hover,
-button.button-disabled:focus,
-button[disabled]:hover,
-button[disabled]:focus,
-input[type='button'].button-disabled:hover,
-input[type='button'].button-disabled:focus,
-input[type='button'][disabled]:hover,
-input[type='button'][disabled]:focus,
-input[type='reset'].button-disabled:hover,
-input[type='reset'].button-disabled:focus,
-input[type='reset'][disabled]:hover,
-input[type='reset'][disabled]:focus,
-input[type='submit'].button-disabled:hover,
-input[type='submit'].button-disabled:focus,
-input[type='submit'][disabled]:hover,
-input[type='submit'][disabled]:focus {
-  background-color: #9b4dca;
-  border-color: #9b4dca;
-}
-.button.button-outline,
-button.button-outline,
-input[type='button'].button-outline,
-input[type='reset'].button-outline,
-input[type='submit'].button-outline {
-  color: #9b4dca;
-  background-color: transparent;
-}
-.button.button-outline:hover, .button.button-outline:focus,
-button.button-outline:hover,
-button.button-outline:focus,
-input[type='button'].button-outline:hover,
-input[type='button'].button-outline:focus,
-input[type='reset'].button-outline:hover,
-input[type='reset'].button-outline:focus,
-input[type='submit'].button-outline:hover,
-input[type='submit'].button-outline:focus {
-  color: #606c76;
-  background-color: transparent;
-  border-color: #606c76;
-}
-.button.button-outline.button-disabled:hover, .button.button-outline.button-disabled:focus, .button.button-outline[disabled]:hover, .button.button-outline[disabled]:focus,
-button.button-outline.button-disabled:hover,
-button.button-outline.button-disabled:focus,
-button.button-outline[disabled]:hover,
-button.button-outline[disabled]:focus,
-input[type='button'].button-outline.button-disabled:hover,
-input[type='button'].button-outline.button-disabled:focus,
-input[type='button'].button-outline[disabled]:hover,
-input[type='button'].button-outline[disabled]:focus,
-input[type='reset'].button-outline.button-disabled:hover,
-input[type='reset'].button-outline.button-disabled:focus,
-input[type='reset'].button-outline[disabled]:hover,
-input[type='reset'].button-outline[disabled]:focus,
-input[type='submit'].button-outline.button-disabled:hover,
-input[type='submit'].button-outline.button-disabled:focus,
-input[type='submit'].button-outline[disabled]:hover,
-input[type='submit'].button-outline[disabled]:focus {
-  color: #9b4dca;
-  border-color: inherit;
-}
-.button.button-clear,
-button.button-clear,
-input[type='button'].button-clear,
-input[type='reset'].button-clear,
-input[type='submit'].button-clear {
-  color: #9b4dca;
-  background-color: transparent;
-  border-color: transparent;
-}
-.button.button-clear:hover, .button.button-clear:focus,
-button.button-clear:hover,
-button.button-clear:focus,
-input[type='button'].button-clear:hover,
-input[type='button'].button-clear:focus,
-input[type='reset'].button-clear:hover,
-input[type='reset'].button-clear:focus,
-input[type='submit'].button-clear:hover,
-input[type='submit'].button-clear:focus {
-  color: #606c76;
-  background-color: transparent;
-  border-color: transparent;
-}
-.button.button-clear.button-disabled:hover, .button.button-clear.button-disabled:focus, .button.button-clear[disabled]:hover, .button.button-clear[disabled]:focus,
-button.button-clear.button-disabled:hover,
-button.button-clear.button-disabled:focus,
-button.button-clear[disabled]:hover,
-button.button-clear[disabled]:focus,
-input[type='button'].button-clear.button-disabled:hover,
-input[type='button'].button-clear.button-disabled:focus,
-input[type='button'].button-clear[disabled]:hover,
-input[type='button'].button-clear[disabled]:focus,
-input[type='reset'].button-clear.button-disabled:hover,
-input[type='reset'].button-clear.button-disabled:focus,
-input[type='reset'].button-clear[disabled]:hover,
-input[type='reset'].button-clear[disabled]:focus,
-input[type='submit'].button-clear.button-disabled:hover,
-input[type='submit'].button-clear.button-disabled:focus,
-input[type='submit'].button-clear[disabled]:hover,
-input[type='submit'].button-clear[disabled]:focus {
-  color: #9b4dca;
-}
-
-input[type='email'],
-input[type='number'],
-input[type='password'],
-input[type='search'],
-input[type='tel'],
-input[type='text'],
-input[type='url'],
-textarea,
-select {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-
-	font-family: "Roboto", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
-	font-size: 14px;
-	font-weight: 300;
-	line-height: 140%;
-	padding:4px;
-
-  background-color: transparent;
-  border: 1px solid #d1d1d1;
-  border-radius: 3px;
-  box-shadow: none;
-  width: 100%;
-
-}
-input[type='email']:focus,
-input[type='number']:focus,
-input[type='password']:focus,
-input[type='search']:focus,
-input[type='tel']:focus,
-input[type='text']:focus,
-input[type='url']:focus,
-textarea:focus,
-select:focus {
-  border: 1px solid #9b4dca;
-  outline: 0;
-}
-
-textarea {
-}
-
-label,
-legend {
-  display: block;
-}
-
-fieldset {
-}
-
-input[type='checkbox'],
-input[type='radio'] {
-  display: inline;
-}
 
 /* ***** code ***** */
 
-code{
+
+
+codex{
 	font-family: Courier, monospace;
 	font-weight: 400;
 	white-space: nowrap;
@@ -265,11 +47,13 @@ code{
 }
 
 pre{
-	background: #f4f5f6;	/* $color-tertiary */
-	border-left: 1px solid #9b4dca;	/* $color-primary */
-	padding: 2px;
+	background: #e0e0f0;
+	border-left: 6px solid #2b9dca;
+	padding: 4px;
 	padding-left: 12px;
 	font-family: Courier, monospace;
+	margin-left: 80px;
+	margin-right: 80px;
 }
 
 pre>code{
@@ -277,17 +61,22 @@ pre>code{
 	font-weight: 300;
 }
 
+
+
 /* ***** link ***** */
 
 a{
-	color: #9b4dca;	/* $color-primary */
+	color: #2b2dca;	/* $color-primary */
 	text-decoration: none;
+	font-weight: bold;
 	cursor: pointer;
 }
 
 a:hover{
-	color: #606c76;	/* $color-secondary */
+	color: #606cf6;	/* $color-secondary */
 }
+
+
 
 /* ***** spacing ***** */
 
@@ -295,7 +84,6 @@ hr {
   border: 0;
   width: 100%;
   border-top: 1px solid #c4c5c6;
-  margin: 64px 0 24px;
 }
 
 .button,
@@ -321,12 +109,16 @@ ol,
 form{
 }
 
+
+
 /* ***** table ***** */
 
 table{
 	table-layout: fixed;
-	border-spacing: 0;
-	width: 100%;
+	table-padding: 10px;
+	border-spacing: 5;
+	width: 80%;
+	padding-left: 10%;
 	margin: 16px 0;
 }
 
@@ -336,10 +128,22 @@ table.modman{
 	margin: 0;
 }
 
-th,td{
-	border-bottom: 1px solid #e1e1e1;
+thead{
+	color: #dedede;
+	background: #6e839a;
+}
+
+th{
 	text-align: left;
-	padding: 4px 0;
+	padding: 5px;
+	padding-left: 15px;
+}
+
+td{
+	text-align: left;
+	padding: 5px;
+	padding-left: 15px;
+	background: #eeeef3;
 }
 
 th{
@@ -354,10 +158,16 @@ td.modman{
 	padding: 0 8px;
 }
 
+
+
 /* ***** typography ***** */
 
 p{
-	margin-top: 16px;
+	padding-left: 50px;
+}
+
+li{
+	margin-left: 50px;
 }
 
 h1,
@@ -366,37 +176,44 @@ h3,
 h4,
 h5,
 h6{
-	font-weight: 400;
+	font-weight: 800;
+	height: 60px;
+	padding-top: 40px;
+	padding-left: 20px;
 }
 
 h1{
-	font-size: 36px;
-	margin: 38px 0 28px;
+	font-size: 46px;
+	background: #7e93aa;
 }
 
 h2{
 	font-size: 32px;
-	margin: 34px 0 24px;
+	height: 30px;
+	padding-top: 10px;
+	background: #9daab8;
 }
 
 h3{
-	font-size: 28px;
-	margin: 32px 0 22px;
+	font-size: 26px;
 }
 
 h4{
-	font-size: 24px;
-	margin: 30px 0 20px;
+	font-size: 22px;
+	height: 40px;
+	padding-top: 10px;
+	background: #7e93aa;
 }
 
 h5{
-	font-size: 20px;
-	margin: 28px 0 18px;
+	font-size: 16px;
+	height: 40px;
+	padding-top: 10px;
+	background: #9daab8;
 }
 
 h6{
-	font-size: 16px;
-	margin: 26px 0 16px;
+	font-size: 12px;
 }
 
 /* ***** wordpress css ***** */
@@ -411,7 +228,7 @@ div.comments-area{
 /* ***** mx2-theme layout ***** */
 
 body.page_body{
-	position:relative;;
+	position:relative;
 	width:100%;
 	height:100%;
 }
@@ -423,8 +240,6 @@ div.page_header{
 	top:0;
 	height:72px;
 	border-bottom:1px solid #9b4dca;
-	padding-left:12px;
-	padding-right:16px;
 	line-height:72px;
 	text-align:center;
 	background:#e8e8e8;
@@ -461,7 +276,7 @@ div.header_text{
 /* parent: page_header */
 div.header_button_strip{
 	display:inline;
-	float:right
+	float:right;
 	top:0;
 	bottom:0;
 }
@@ -520,7 +335,6 @@ div.page_content{
 /* parent: page_content */
 div.post_content{
 	position: static;
-	padding:8px 24px;
 	max-width: 840px;
 	margin: 0 auto;
 	clear: left;
@@ -540,7 +354,6 @@ div.modules_nav_wrapper{
 	bottom: 0;
 	width:249px;
 	height:100%;
-	padding:16px 12px;
 	border-right:1px solid #d1d1d1;
 	overflow:auto;
 	-webkit-overflow-scrolling:touch;
@@ -578,7 +391,6 @@ iframe.modules_docs_iframe{
 /* parent: modules_docs_iframe */
 body.docs_body{
 	width:100%;
-	padding:12px 24px;
 }
 
 /* parent: docs_body */

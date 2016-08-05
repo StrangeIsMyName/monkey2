@@ -59,32 +59,36 @@ Class HtmlView Extends View
 
 	
 	Method Go( url:String )
-		If url.Contains( "#" )
+		'print url
+		
+		If url.Contains( "#" ) Then
 			Return
 		Endif
 		
-		Local root:=ExtractRootDir( url )
+		Local root := ExtractRootDir( url )
 		
-		If root="http://" Or root="https://"
+		If root = "http://" Or root = "https://" Then
 			requesters.OpenUrl( url )
 			Return
 		Endif
 		
-		If Not root
-			url=BaseUrl+url
+		If Not root Then
+			url = BaseUrl + url
 		Endif
 		
-		Local src:=stringio.LoadString( url )
+'		Print "url= " + url
 		
-		If ExtractExt( url )=".md"
-			src=hoedown.MarkdownToHtml( src )
-			Local wrapper:=stringio.LoadString( "asset::mojox/markdown_wrapper.html" )
-			src=wrapper.Replace( "${CONTENT}",src )
+		Local src := stringio.LoadString( url )
+		
+		If ExtractExt( url ) = ".md" then
+			src = hoedown.MarkdownToHtml( src )
+			Local wrapper := stringio.LoadString( "asset::mojox/markdown_wrapper.html" )
+			src = wrapper.Replace( "${CONTENT}",src )
 		End
 		
-		BaseUrl=ExtractDir( url )
+		BaseUrl = ExtractDir( url )
 		
-		HtmlSource=src
+		HtmlSource = src
 	End
 
 
@@ -97,7 +101,7 @@ Private
 	Field _container:litehtml.document_container
 	Field _anchorClicked:String
 	
-	Field _baseUrl:String
+	Field _baseUrl:String = ""
 	Field _source:String
 	Field _document:litehtml.document
 	Field _layoutSize:Vec2i
@@ -127,10 +131,10 @@ Private
 		If Not _document Return
 		
 		Local clip:litehtml.position
-		clip.x=ClipRect.X
-		clip.y=ClipRect.Y
-		clip.width=ClipRect.Width
-		clip.height=ClipRect.Height
+		clip.x = ClipRect.X
+		clip.y = ClipRect.Y
+		clip.width = ClipRect.Width
+		clip.height = ClipRect.Height
 
 		_document.draw( canvas,0,0,Varptr clip )
 	End
@@ -155,7 +159,19 @@ Private
 			_document.on_mouse_leave()
 		End
 		
-		If _anchorClicked AnchorClicked( _anchorClicked )
+'		If _anchorClicked AnchorClicked( _anchorClicked )
+		If _anchorClicked Then
+			local url := _anchorClicked
+			
+			If url.StartsWith( "javascript:void('" ) And url.EndsWith( "')" )
+				Local page := url.Slice( url.Find( "'" )+1,url.FindLast( "'" ) )
+				page = CurrentDir()+"modules/"+page.Replace( ":","/docs/__PAGES__/" ).Replace( ".","-" )+".html"
+				Go( page )
+				Return
+			Endif
+
+			Go( url )
+		end if
 	End
 	
 End

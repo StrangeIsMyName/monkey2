@@ -35,6 +35,7 @@ Class MainWindowInstance Extends Window
 	Field _fileNextFile:Action
 	Field _filePrevFile:Action
 	Field _fileOpenProject:Action
+	Field _fileProjectRefresh:Action
 	Field _fileQuit:Action
 	
 	Field _editUndo:Action
@@ -60,6 +61,8 @@ Class MainWindowInstance Extends Window
 	Field _helpAbout:Action
 	
 	Field _panelColor:Action
+	Field _panelHelp:Action
+	Field _panelPrefs:Action
 	
 	Field _findNext:Action
 	Field _findPrevious:Action
@@ -73,6 +76,13 @@ Class MainWindowInstance Extends Window
 	Field _escape:Action
 	Field _cmdEscape:Action
 	Field _showConsole:bool = true
+	
+  field _prefsButton:Buttonx
+	Field _showPrefs:bool = False
+  field _helpButton:Buttonx
+	Field _showHelp:bool = false
+
+	Field _htmlHelpView:HtmlView
 	
 	'menus
 	Field _menuBar:MenuBar
@@ -137,10 +147,12 @@ Class MainWindowInstance Extends Window
 
 	
 	Method OnFileOpen()
-		Local path:=RequestFile( "Open file...","",False )
+		Local path := RequestFile( "Open file...", "", False )
 		If Not path Return
 	
-		OpenDocument( path,True )
+		OpenDocument( path, True )
+		if _showHelp then OnPanelHelp()
+				
 		SaveState()
 	End
 
@@ -278,6 +290,12 @@ Class MainWindowInstance Extends Window
 	End
 
 
+	
+	Method OnFileProjectRefresh()
+		_projectView.RefreshProject()
+	end
+	
+	
 	
 	Method OnFileQuit()
 		For Local doc:=Eachin _openDocs
@@ -423,7 +441,7 @@ Class MainWindowInstance Extends Window
 
 	
 	Method OnHelpOfflineHelp()
-		App.Idle+=Lambda()
+		App.Idle += Lambda()
 			requesters.OpenUrl( "file://"+CurrentDir()+"docs/index.html" )
 		End
 	End
@@ -431,6 +449,12 @@ Class MainWindowInstance Extends Window
 
 	
 	Method OnHelpAbout()
+		local htm:string = CurrentDir()+"src/ted21/assets/about.html"
+		_htmlHelpView.Go( RealPath( htm ) )
+		if not _showHelp then OnPanelHelp()
+		
+
+#rem
 		Local htmlView := New HtmlView
 		htmlView.Go( "asset::ted2/about.html" )
 
@@ -446,6 +470,7 @@ Class MainWindowInstance Extends Window
 		End
 		
 		dialog.Open()
+#end
 	End
 
 
@@ -455,6 +480,70 @@ Class MainWindowInstance Extends Window
 	End
   
   
+	Method OnPanelHelp()
+		_showHelp = not _showHelp
+
+		_helpButton.Selected = _showHelp
+
+		if _showHelp Then
+			_console.Visible = false
+'			_docTabber.Visible = false
+			_docker.ContentView = _htmlHelpView
+
+			'print ">"+_htmlHelpView.BaseUrl+"< "+CurrentDir()
+			if _htmlHelpView.BaseUrl = CurrentDir() then
+				local htm:string' = "file://"+CurrentDir()+"docs/index.html"
+				htm = CurrentDir()+"modules/mojo/docs/__PAGES__/module.html"
+				_htmlHelpView.Go( RealPath( htm ) )
+			end if
+
+		Else
+			if _showPrefs Then
+				return
+			end If
+
+			_docker.ContentView = _docTabber
+'			_docTabber.Visible = true
+
+			_currentTextView = Null
+			If _currentDoc then
+				_currentTextView = Cast<TextView>( _currentDoc.View )
+				
+				If _currentTextView Then
+					if _showConsole then _console.Visible = true
+				endif
+			end if
+		end if
+	End
+
+
+  
+	Method OnPanelPrefs()
+		_showPrefs = not _showPrefs
+
+		_prefsButton.Selected = _showPrefs
+			
+		if _showPrefs Then
+			_console.Visible = false
+			_docTabber.Visible = false
+		Else
+			if _showHelp Then
+				return
+			end If
+			
+			_docTabber.Visible = true
+
+			_currentTextView = Null
+			If _currentDoc then
+				_currentTextView = Cast<TextView>( _currentDoc.View )
+				
+				If _currentTextView Then
+					if _showConsole then _console.Visible = true
+				endif
+			end if
+		endif
+	End
+    
   
 	Method OnFindNext()
 		If Not _currentTextView Return
@@ -615,6 +704,9 @@ Class MainWindowInstance Extends Window
 
 	
 	Method OnCmdEscape()
+'		print _showConsole+" "+_console.Visible
+		if not _console then Return
+		
 		_console.Visible = Not _console.Visible
 		_showConsole = Not _showConsole
 	End
@@ -691,6 +783,11 @@ Class MainWindowInstance Extends Window
 		
 		_fileOpenProject=New Action( "Open project" )
 		_fileOpenProject.Triggered=OnFileOpenProject
+
+		_fileProjectRefresh = New Action( "Refresh" )
+		_fileProjectRefresh.Triggered = OnFileProjectRefresh
+		_fileProjectRefresh.HotKey = Key.R
+		_fileProjectRefresh.HotKeyModifiers = _modifier | Modifier.Shift
 		
 		_fileQuit=New Action( "Quit" )
 		_fileQuit.Triggered=OnFileQuit
@@ -747,12 +844,12 @@ Class MainWindowInstance Extends Window
 
 		_findShowInvisibles=New Action( "Show tabs and Returns" )
 		_findShowInvisibles.HotKey=Key.T
-		_findShowInvisibles.HotKeyModifiers = _modifier
+		_findShowInvisibles.HotKeyModifiers = _modifier | Modifier.Shift
 		_findShowInvisibles.Triggered=OnFindShowInvisibles
 
 		_findUseBigCursor=New Action( "Use Big Cursor" )
-		_findUseBigCursor.HotKey=Key.B
-		_findUseBigCursor.HotKeyModifiers = _modifier
+'		_findUseBigCursor.HotKey=Key.B
+'		_findUseBigCursor.HotKeyModifiers = _modifier
 		_findUseBigCursor.Triggered=OnFindUseBigCursor
 
 
@@ -802,6 +899,16 @@ Class MainWindowInstance Extends Window
 		_panelColor.HotKey=Key.P
 		_panelColor.HotKeyModifiers = _modifier
 		_panelColor.Triggered=OnPanelColor
+
+		_panelPrefs=New Action( "Preferences Panel" )
+		_panelPrefs.HotKey=Key.Comma
+		_panelPrefs.HotKeyModifiers = _modifier
+		_panelPrefs.Triggered = OnPanelPrefs
+
+		_panelHelp=New Action( "Help Panel" )
+		_panelHelp.HotKey = Key.Slash
+		_panelHelp.HotKeyModifiers = _modifier
+		_panelHelp.Triggered = OnPanelHelp
 		
 		_escape = New Action( "" )
 		_escape.HotKey = Key.Escape
@@ -836,7 +943,7 @@ Class MainWindowInstance Extends Window
 		_scriptMenu = New Menu( "Scripts" )
 		Local obj := JsonObject.Load( "asset::ted2/scripts.json" )
 		Local hotkey := 0
-		If obj
+		If obj then
 			For Local obj2 := Eachin obj["scripts"].ToArray()
 				Local name := obj2.ToObject()["name"].ToString()
 				Local script := obj2.ToObject()["script"].ToString()
@@ -856,7 +963,7 @@ Class MainWindowInstance Extends Window
 
 		_scripts = New Menu( "Scripts" )
 		'Local obj:=JsonObject.Load( "asset::ted2/scripts.json" )
-		If obj
+		If obj then
 			For Local obj2 := Eachin obj["scripts"].ToArray()
 				Local name := obj2.ToObject()["name"].ToString()
 				Local script := obj2.ToObject()["script"].ToString()
@@ -894,6 +1001,7 @@ Class MainWindowInstance Extends Window
 		_fileMenu.AddSeparator()
 		_fileMenu.AddAction( _fileOpenProject )
 		_fileMenu.AddSubMenu( _closeProject )
+		_fileMenu.AddAction( _fileProjectRefresh )
 		_fileMenu.AddSeparator()
 		_fileMenu.AddAction( _fileQuit )
 		
@@ -929,13 +1037,18 @@ Class MainWindowInstance Extends Window
 		_buildMenu.AddAction( _buildForceStop )
 		
 		_helpMenu=New Menu( "Help" )
-		_helpMenu.AddAction( _helpOnlineHelp, NODEKIND_HELPONLINE )
+		_helpMenu.AddAction( _panelHelp, NODEKIND_HELP )
 		_helpMenu.AddAction( _helpOfflineHelp, NODEKIND_HELPBOOKS )
+		_helpMenu.AddSeparator()
+		_helpMenu.AddAction( _helpOnlineHelp, NODEKIND_HELPONLINE )
 		_helpMenu.AddSeparator()
 		_helpMenu.AddAction( _helpAbout, NODEKIND_HELP )
 
 		_panelMenu=New Menu( "Panels" )
 		_panelMenu.AddAction( _panelColor, NODEKIND_COLORPANEL )
+		_panelMenu.AddSeparator()
+		_panelMenu.AddAction( _panelHelp, NODEKIND_HELP )
+		_panelMenu.AddAction( _panelPrefs, NODEKIND_PREFS )
 		_panelMenu.AddSeparator()
 		_panelMenu.AddAction( _cmdEscape, NODEKIND_CONSOLE )
 		
@@ -955,36 +1068,36 @@ Class MainWindowInstance Extends Window
 			_menuBar.AddView( _fieldButton,"left",30, false )
 
 		local _actionField:Action
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
+		_actionField = New Action( "method" )
+		_actionField.Triggered = Lambda()
 			OnFileNew()
 		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageButton = 7'NODEKIND_NEW
+		_fieldButton = New Buttonx( _actionField, "", 40, 40)
+		_fieldButton.ImageButton = 7'NODEKIND_NEW
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
+		_actionField = New Action( "method" )
+		_actionField.Triggered = Lambda()
 			OnFileOpen()
 		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageButton = 4'NODEKIND_OPEN
+		_fieldButton = New Buttonx( _actionField, "", 40, 40)
+		_fieldButton.ImageButton = 4'NODEKIND_OPEN
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
+		_actionField = New Action( "method" )
+		_actionField.Triggered = Lambda()
 			OnFileSave()
 		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageButton = 5'NODEKIND_SAVE
+		_fieldButton = New Buttonx( _actionField, "", 40, 40)
+		_fieldButton.ImageButton = 5'NODEKIND_SAVE
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
+		_actionField = New Action( "method" )
+		_actionField.Triggered = Lambda()
 			OnFileSaveAs()
 		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageButton = 6'NODEKIND_SAVEAS
+		_fieldButton = New Buttonx( _actionField, "", 40, 40)
+		_fieldButton.ImageButton = 6'NODEKIND_SAVEAS
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
 		 _fieldButton = New Buttonx( "", 40, 40)
@@ -1013,28 +1126,28 @@ Class MainWindowInstance Extends Window
 '		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
 '			_menuBar.AddView( _fieldButton,"left",30, false )
 
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
+		_actionField = New Action( "method" )
+		_actionField.Triggered = Lambda()
 			OnBuildRelease()
 		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageButton = 8'NODEKIND_RUN
+		_fieldButton = New Buttonx( _actionField, "", 40, 40)
+		_fieldButton.ImageButton = 8'NODEKIND_RUN
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
+		_actionField = New Action( "method" )
+		_actionField.Triggered = Lambda()
 			OnBuildDebug()
 		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageButton = 9'NODEKIND_RUNDEBUG
+		_fieldButton = New Buttonx( _actionField, "", 40, 40)
+		_fieldButton.ImageButton = 9'NODEKIND_RUNDEBUG
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-    _actionField = New Action( "method" )
-    _actionField.Triggered = Lambda()
+		_actionField = New Action( "method" )
+		_actionField.Triggered = Lambda()
 			OnBuildForceStop()
 		end
-   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-   _fieldButton.ImageButton = 17'NODEKIND_SAVEAS
+		_fieldButton = New Buttonx( _actionField, "", 40, 40)
+		_fieldButton.ImageButton = 17'NODEKIND_SAVEAS
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
 		 _fieldButton = New Buttonx( "", 40, 40)
@@ -1050,21 +1163,30 @@ Class MainWindowInstance Extends Window
 		end
 
 		local _actionFind:Action
-    _actionFind = New Action( "find" )
-    _actionFind.Triggered = Lambda()
+		_actionFind = New Action( "find" )
+		_actionFind.Triggered = Lambda()
 			print "find "+_findField.Text
 		end
-   _fieldButton = New Buttonx( _actionFind, "", 40, 40)
-   _fieldButton.ImageButton = 3'NODEKIND_FIND
+		_fieldButton = New Buttonx( _actionFind, "", 40, 40)
+		_fieldButton.ImageButton = 3'NODEKIND_FIND
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-    _actionFind = New Action( "prefs" )
-    _actionFind.Triggered = Lambda()
-			print "prefs "
+
+		_actionFind = New Action( "prefs" )
+		_prefsButton = New Buttonx( _actionFind, "", 40, 40)
+		_actionFind.Triggered = Lambda()
+			OnPanelPrefs()
 		end
-   _fieldButton = New Buttonx( _actionFind, "", 40, 40)
-   _fieldButton.ImageButton = 16'NODEKIND_FIND
-		_menuBar.AddView( _fieldButton,"right",40, false )
+		_prefsButton.ImageButton = 16'NODEKIND_FIND
+		_menuBar.AddView( _prefsButton,"right",40, false )
+
+		_actionFind = New Action( "help" )
+		_helpButton = New Buttonx( _actionFind, "", 40, 40)
+		_actionFind.Triggered = Lambda()
+			OnPanelHelp()
+		end
+		_helpButton.ImageButton = 18
+		_menuBar.AddView( _helpButton,"right",40, false )
 
 	End
 
@@ -1096,6 +1218,15 @@ Class MainWindowInstance Extends Window
     
 		_debugView = New DebugView
 		_helpView = New HelpView
+		_helpView.PageClicked = Lambda( url:string )
+			if url <> "" then
+				'print "goto "+url
+'				url = CurrentDir()+"modules/mojo/docs/__PAGES__/module.html"
+				url = CurrentDir()+"modules/"+url.Replace( ":","/docs/__PAGES__/" ).Replace( ".","-" )+".html"
+				_htmlHelpView.Go( RealPath( url ) )
+				if not _showHelp then OnPanelHelp()
+			end if
+		end
 
 		_browser = New TabView
 		_browser.AddTab( "Project", _projectView )
@@ -1111,7 +1242,7 @@ Class MainWindowInstance Extends Window
 
 
 
-
+#rem
 		select _browser.CurrentView
 			case _helpView
 				print "helpview"
@@ -1133,6 +1264,7 @@ Class MainWindowInstance Extends Window
 '				if _browser.PreviousView = _helpView Then
 '				end if
 		end select
+#end		
 '			if _browser.CurrentView = _codeView Then
 				'print "CODE VIEW"
 				
@@ -1141,7 +1273,6 @@ Class MainWindowInstance Extends Window
 		
 '			end if
 		end 
-		
 		
 		_colorView = New ColorView
 		_colorView.UseColor = Lambda()
@@ -1156,8 +1287,13 @@ Class MainWindowInstance Extends Window
 		end
 		
 		
+		_htmlHelpView = New HtmlView
+'		_htmlHelpView.ReadOnly = false
+		
+		
 		_console = New Console
 		_console.ReadOnly = True
+		
 		
 		_docTabber = New TabViewX
 		_docTabber.CurrentChanged = Lambda()
@@ -1179,8 +1315,9 @@ Class MainWindowInstance Extends Window
 		_docker.AddView( _statusbar, "bottom", 30, false )
 		
 		_docker.AddView( _browser,"left",250 )
-		_docker.AddView( _colorView,"right",200, false )
 		_docker.AddView( _console,"bottom",200 )
+		_docker.AddView( _colorView,"right",200, false )
+
 
 	End
 
@@ -1261,6 +1398,9 @@ Class MainWindowInstance Extends Window
 		For Local path:=Eachin _recent
 			_recentFiles.AddAction( path, GetIconFromExt( ExtractExt( path ) ) ).Triggered = Lambda()
 				OpenDocument( path )
+				
+				if _showHelp then OnPanelHelp()
+
 			End
 		Next
 	End
@@ -1292,6 +1432,10 @@ Class MainWindowInstance Extends Window
 		Endif
 		If obj.Contains( "showBigCursor" )
 			_showBigCursor = obj["showBigCursor"].ToBool()
+		Endif
+		If obj.Contains( "showConsole" )
+			_showConsole = obj["showConsole"].ToBool()
+'			if _console then _console.Visible = _showConsole
 		Endif
 
 		If obj.Contains( "openDocuments" )
@@ -1388,6 +1532,7 @@ Class MainWindowInstance Extends Window
 		obj["showBigCursor"] = New JsonNumber( _showBigCursor )
 
 		obj["consoleSize"] = New JsonNumber( _docker.GetViewSize( _console ) )
+		obj["showConsole"] = New JsonNumber( _showConsole )
 		
 		obj["browserSize"] = New JsonNumber( _docker.GetViewSize( _browser ) )
 		
@@ -1583,7 +1728,7 @@ Class MainWindowInstance Extends Window
 		End
 
 		UpdateKeyView()
-		
+
 '		print _currentDoc.GetMouseX()
 		
 		Update()

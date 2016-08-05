@@ -80,6 +80,8 @@ End
 
 Class Mx2TextView Extends TextView
 
+	field _editorColors := New Color[15]
+
 	Method New( mx2Doc:Mx2Document )
 		_mx2Doc = mx2Doc
 		
@@ -95,7 +97,6 @@ Class Mx2TextView Extends TextView
 		
 		GutterWidth = 80
 		
-		Local _editorColors:=New Color[15]
 		
 		Select Theme.Name
 			Case "light"
@@ -157,6 +158,7 @@ Protected
 		clip.min.y = -Frame.min.y
 		clip.max.x = clip.min.x+GutterWidth
 		clip.max.y = clip.min.y+ClipRect.Height
+
 		
 		local lineCount:int = Document.LineCount
 		
@@ -180,11 +182,103 @@ Protected
 		canvas.Color = color
 		Super.OnRender( canvas )
 		
+		
 		'OK, VERY ugly! Draw gutter stuff...
+		'draw right code view
+		canvas.Color = New Color( 0,0,0, .15 )
+		local lft:int = ClipRect.Width - 50 + ClipRect.X
+		local rght:int = lft + 50
+		canvas.DrawRect( lft, ClipRect.Y, 50, ClipRect.Height )
+		local lineDifference:float = float(Document.LineCount) / ClipRect.Height
+		local pos:Int
+		local line:int = 0
+		local ll:int
+		local lineLength:int
+		local prevline:int = 0
+		
+		local prevDebug:int = 0
+		local currDebug:int = 0
+		local nextDebug:int = GetDebugState( 0 )
+		
+'		print ClipRect.Height+" "+Document.LineCount+" "+lineDifference
+		local screenY:int = ClipRect.Y
 		
 		Local viewport := clip
+		Local line0 := clip.Top/LineHeight
+		Local line1 := Min( (clip.Bottom-1)/LineHeight+1, Document.LineCount )
+		
+		canvas.Color = New Color( 1,1,1, 0.2 )
+		for pos = 0 to ClipRect.Height-1
+			line = pos * lineDifference
+			
+			if line >= line0 and line <= line1 Then
+				canvas.Color = New Color( 1,1,1, 0.1 )
+				canvas.DrawLine( lft, screenY, rght, screenY )
+				canvas.Color = New Color( 1,1,1, 0.2 )
+			end if
+			
+			ll = Document.LineLength( line )
+			lineLength = (ll-prevline) / 5
+			prevline = ll
+
+			prevDebug = currDebug
+			currDebug = nextDebug
+			nextDebug = GetDebugState( line + 1 )
+			if line < Document.LineCount-2 and (prevDebug or currDebug or nextDebug) Then
+				canvas.Color = Color.Red
+				canvas.DrawLine( lft, screenY, rght, screenY )
+				canvas.Color = New Color( 1,1,1, 0.2 )
+			end if
+			
+			if lineLength > 0 Then
+				select Document.GetCodeJumpIcon( line )
+					case NODEKIND_CLASS
+						canvas.Color = _editorColors[COLOR_CLASS]
+						canvas.DrawLine( lft, screenY, lft + lineLength, screenY )
+						canvas.Color = New Color( 1,1,1, 0.2 )
+					case NODEKIND_METHOD
+						canvas.Color = _editorColors[COLOR_METHOD]
+						canvas.DrawLine( lft, screenY, lft + lineLength, screenY )
+						canvas.Color = New Color( 1,1,1, 0.2 )
+					case NODEKIND_FUNCTION
+						canvas.Color = _editorColors[COLOR_FUNCTION]
+						canvas.DrawLine( lft, screenY, lft + lineLength, screenY )
+						canvas.Color = New Color( 1,1,1, 0.2 )
+					case NODEKIND_FIELD
+						canvas.Color = _editorColors[COLOR_FIELD]
+						canvas.DrawLine( lft, screenY, lft + lineLength, screenY )
+						canvas.Color = New Color( 1,1,1, 0.2 )
+					case NODEKIND_LAMBDA
+						canvas.Color = _editorColors[COLOR_LAMBDA]
+						canvas.DrawLine( lft, screenY, lft + lineLength, screenY )
+						canvas.Color = New Color( 1,1,1, 0.2 )
+					case NODEKIND_PROPERTY
+						canvas.Color = _editorColors[COLOR_PROPERTY]
+						canvas.DrawLine( lft, screenY, lft + lineLength, screenY )
+						canvas.Color = New Color( 1,1,1, 0.2 )
+					default
+						if Document.LineState( line ) <> -1 Then
+							canvas.Color = _editorColors[COLOR_COMMENT]
+							canvas.DrawLine( lft, screenY, lft + lineLength, screenY )
+							canvas.Color = New Color( 1,1,1, 0.2 )
+						else
+							canvas.DrawLine( lft, screenY, lft + lineLength, screenY ) 
+						end if
+				end select
+						
+
+			end if
+			screenY += 1
+
+		next
+		
+		
+
+		'draw left gutter and code and stuff
+
 		viewport.min += RenderStyle.Bounds.min
 		canvas.Viewport = viewport
+
 		
 		canvas.Color = New Color( .2, .2, .2 )
 		canvas.DrawRect( 0, 0, viewport.Width-4, viewport.Height )
@@ -194,10 +288,6 @@ Protected
 		
 		canvas.Viewport = Rect
 		
-		Local line0 := clip.Top/LineHeight
-'		Local line1 := (clip.Bottom-1)/LineHeight+1
-
-		Local line1 := Min( (clip.Bottom-1)/LineHeight+1, Document.LineCount )
 
 		
 '		canvas.Color = New Color( .35, .35, .35 )
@@ -311,14 +401,17 @@ Private
 				End
 			
 			Case EventType.KeyChar
-				Select event.Key
-					Case Key.Equals
-						AddSpace( "=" )
-						return
-					case Key.Comma
-						AddSpace( "," )
-						return
-				end 
+				local _shift := event.Modifiers & Modifier.Shift
+				if not _shift then
+					Select event.Key
+						Case Key.Equals
+							AddSpace( "=" )
+							return
+						case Key.Comma
+							AddSpace( "," )
+							return
+					end 
+				end if
 			
 				If Not IsIdent( event.Text[0] )
 					Capitalize( True )
@@ -327,6 +420,33 @@ Private
 
 		Super.OnKeyEvent( event )
 	End
+
+
+
+	Method OnMouseEvent( event:MouseEvent ) Override
+		Select event.Type
+			Case EventType.MouseDown
+				local lft:int = ClipRect.Width - 50 + ClipRect.X
+'				local rght:int = lft + 50
+'				print event.Location.X+" "+lft+" "+rght
+				
+				if event.Location.X > lft Then
+					'canvas.DrawRect( lft, ClipRect.Y, 50, ClipRect.Height )
+					local lineDifference:float = float(Document.LineCount) / ClipRect.Height
+					local line:float = ( (event.Location.Y - ClipRect.Y) * lineDifference )
+					GotoLine( line )
+'					local clipPos:int = ( (Height / Document.LineCount) * line )
+'					ClipRect.Top = clipPos
+					return
+				end if
+        
+		End Select
+
+		Super.OnMouseEvent( event )
+		
+	End
+
+
 
 End
 

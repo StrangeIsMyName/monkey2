@@ -138,6 +138,12 @@ Class TextDocument
 
 
 
+	method GetLineCount:int()
+		return LineCount
+	end Method
+	
+	
+	
 	method GetDebugLine:int( line:int )
 		If line >= 0 And line < _lines.Length Return _lines[ line ].debug
 		Return -1
@@ -154,6 +160,7 @@ Class TextDocument
 		If line >= 0 And line < _lines.Length Return _lines[ line ].icon
 		Return 0
 	End
+
 
 
 	
@@ -352,7 +359,7 @@ Class TextDocument
 			'update highlighting
 			'
 			Local state := -1
-			If line state = _lines[line-1].state
+			If line then state = _lines[line-1].state
 			
 			local jumpline:int = -1
 			
@@ -744,9 +751,9 @@ Class TextView Extends View
 
 
 	Property ShowInvisibles:Bool()
-		Return _showInvisibles
+		Return _doc._showHidden
 	Setter( showInvisibles:Bool )
-		_showInvisibles = showInvisibles
+		_doc._showHidden = showInvisibles
 	End
 
 
@@ -1201,7 +1208,7 @@ Class TextView Extends View
 		_cursor = _doc.StartOfLine( line ) + row
 		_anchor = _cursor
 		UpdateCursor()
-	  end Method
+	end Method
   
   
   
@@ -1565,6 +1572,14 @@ Protected
 
 
 	
+'	Property RightGutterWidth:Int()
+'		Return _rightgutterw
+'	Setter( rightGutterWidth:Int )
+'		_rightgutterw = rightGutterWidth
+'	End
+
+
+
 	Property ContentMargin:Recti()
 		Return _contentMargin
 	Setter( contentMargin:Recti )
@@ -1586,7 +1601,7 @@ Protected
 
 
 	Method OnMeasure:Vec2i() Override
-		Return New Vec2i( 320*_charw+_gutterw,_doc.LineCount*_charh )+_contentMargin.Size
+		Return New Vec2i( (320*_charw) + _gutterw , _doc.LineCount*_charh )+_contentMargin.Size
 	End
 
 
@@ -1666,11 +1681,11 @@ Protected
 				
 				if i1 <= i0 Then
         
-					if text.Left(1) = "~t" and _showInvisibles then
-'						if _doc._showHidden then
+					if text.Left(1) = "~t" then
+						if _doc._showHidden then
 							canvas.Color = Color.LightGrey
 							canvas.DrawImageIcon( _icons, x + tabsize, y,  NODEKIND_TAB, 80 )
-'						end if
+						end if
 					endif
 					
 				else
@@ -1720,7 +1735,7 @@ Protected
 			
 			Wend
 
-			if _showInvisibles then'_doc._showHidden then
+			if _doc._showHidden then
 				canvas.Color = Color.LightGrey
 				canvas.DrawImageIcon( _icons, x + tabsize, y,  NODEKIND_RETURN, 80 )
 			endif
@@ -1765,7 +1780,7 @@ Protected
 				local _alt := event.Modifiers & Modifier.Alt
 				local _command := event.Modifiers & Modifier.Command
 				local _shift := event.Modifiers & Modifier.Shift
-
+				
 				Select event.Key
 			
 					Case Key.A
@@ -1869,51 +1884,12 @@ Protected
 							return
 
 						Else
-							print "line"
+							'print "line"
 								if not _shift then
 									ReplaceText( "~t" )
 								end if
 						end if
 						
-'						print "anchor="+min+" cursor="+max
-'						print " line="+min
-'						print "fromline="+startLine+" endline="+endLine
-#rem						
-						if min < nextLine and max >= nextLine Then
-							local startLine:int = _doc.StartOfLine( line )
-							local difference:int = max - min
-							while startLine < endLine
-								startLine = _doc.StartOfLine( line )
-								_cursor = startLine
-								_anchor = startLine
-								if _shift Then
-									if _doc._text.Mid(startLine, 1) = "~t" or _doc._text.Mid(startLine, 1) = " " Then
-'										print "endent"
-										_anchor = startLine
-										_cursor = startLine + 1
-										ReplaceText( "" )
-										difference -= 1
-									end if
-								else
-									ReplaceText( "~t" )
-									difference += 1
-								end if
-								'print "indenting line="+line
-								line += 1
-							wend
-							
-'							print "indent min="+min+" difference="+difference
-							_anchor = min
-							_cursor = min + difference
-							UpdateCursor()
-'							print _anchor+" "+_cursor
-							return
-							
-						Else
-'							print "normal"
-						end if
-'						ReplaceText( "~t" )
-#end            
 					Case Key.Enter
 						ReplaceText( "~n" )
             
@@ -2066,8 +2042,8 @@ Protected
 						end If
             
 					Default
-          
 						Return
+
 				End
 			
 				If Not (event.Modifiers & Modifier.Shift) _anchor = _cursor
@@ -2075,7 +2051,9 @@ Protected
 			Case EventType.KeyChar
 				If _undos.Length
 					Local undo := _undos.Top
+
 					If Not undo.text And _cursor = undo.cursor then
+						
 						ReplaceText( _anchor,_cursor, event.Text )
 						undo.cursor = _cursor
 						Return

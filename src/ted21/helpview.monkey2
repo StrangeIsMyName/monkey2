@@ -7,13 +7,13 @@ Namespace ted2
 
 
 Function EnumModules:String[]()
-	Local mods:=New StringStack
+	Local mods := New StringStack
 
-	local path:="modules/"
-	for local file:=eachin LoadDir(path)
-		if GetFileType(path+file)=FileType.Directory
-			If GetFileType(path+file+"/docs/__PAGES__")=FileType.Directory
-				mods.Push(file)
+	local path := "modules/"
+	for local file := eachin LoadDir( path )
+		if GetFileType( path + file ) = FileType.Directory
+			If GetFileType( path + file + "/docs/__PAGES__") = FileType.Directory
+				mods.Push( file )
 			endif
 		endif
 	next
@@ -79,7 +79,8 @@ Class HelpView Extends DockingView
 			Local node := Cast<HelpTree.Node>( tnode )
 			If Not node Return
 			
-			Go( node.Page )
+'			Go( node.Page )
+			PageClicked( node.Page )
 		End
 
 		
