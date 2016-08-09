@@ -48,52 +48,59 @@ Class ThemeInstance
 		Endif
 
 		Select _name
-      Case "light"
-        _textColor=New Color( 0,0,0 )
-        _disabledColor=New Color( .5,.5,.5 )
-        _clearColor=New Color( .8,.8,.8 )
-        _contentColor=New Color( .95,.95,.95 )
-        _panelColor=New Color( .9,.9,.9 )
-        _gutterColor=New Color( .8,.8,.8 )
-        _borderColor=New Color( .7,.7,.7 )
-        _lineColor=New Color( .95,.95,.95 )
-        _knobColor=New Color( .7,.7,.7 )
-        _hoverColor=New Color( .6,.6,.6 )
-        _activeColor=New Color( .5,.5,.5 )
-
-      Default
-        _textColor = New Color( 1,1,1 )
-        _disabledColor = New Color( .5,.5,.5 )
-        _clearColor = New Color( .1,.1,.1 )
-        _contentColor = New Color( .13,.13,.13 )
-        _panelColor = New Color( .25,.25,.25 )
-        _gutterColor = New Color( .1,.1,.1 )
-        _borderColor = New Color( .1,.1,.1 )
-        _lineColor = New Color( .2,.2,.2 )
-        _knobColor = New Color( .4,.4,.4 )
-        _hoverColor = New Color( .6,.6,.6 )
-        _activeColor = New Color( .7,.7,.7 )
-        
-        _selectColor = New Color( 0,.5,1 )
-        _selectColorT = New Color( 0,.5,1, .4 )
-        _selectColorH = New Color( 0,.5,1, .7 )
-        _selectColor2 = New Color( 0,.4,0.9 )
-        _backgroundColor = New Color( .15, .15, .15 )
-        _toolColor = New Color( .25, .25, .25, 0.5 )
-        _transparentColor = New Color( 0,.5,1, 0 )
+			Case "light"
+				_textColor = New Color( 0,0,0 )
+				_disabledColor = New Color( .5,.5,.5 )
+				_clearColor = New Color( .8,.8,.8 )
+				_contentColor = New Color( .95,.95,.95 )
+				_panelColor = New Color( .9,.9,.9 )
+				_gutterColor = New Color( .8,.8,.8 )
+				_borderColor = New Color( .7,.7,.7 )
+				_lineColor = New Color( .95,.95,.95 )
+				_knobColor = New Color( .7,.7,.7 )
+				_hoverColor = New Color( .6,.6,.6 )
+				_activeColor = New Color( .5,.5,.5 )
+				
+			Default
+				_textColor = New Color( .9,.9,.9 )
+				_disabledColor = New Color( .5,.5,.5 )
+				_clearColor = New Color( .1,.1,.1 )
+				_contentColor = New Color( .13,.13,.13 )
+				_panelColor = New Color( .25,.25,.25 )
+				_gutterColor = New Color( .1,.1,.1 )
+				_borderColor = New Color( .1,.1,.1 )
+				_lineColor = New Color( .2,.2,.2 )
+				_knobColor = New Color( .4,.4,.4 )
+				_hoverColor = New Color( .6,.6,.6 )
+				_activeColor = New Color( .7,.7,.7 )
+				
+				_selectColor = New Color( 0,.5,1 )
+				_selectColorT = New Color( 0,.5,1, .4 )
+				_selectColorH = New Color( 0,.5,1, .7 )
+				_selectColor2 = New Color( 0,.4,.9 )
+				_backgroundColor = New Color( .15, .15, .15 )
+				_toolColor = New Color( .25, .25, .25, 0.5 )
+				_transparentColor = New Color( 0,.5,1, 0 )
 		End
 		
-		_defaultFont=Font.Open( App.DefaultFontName, _fontSize )
-		_defaultMonoFont=Font.Open( App.DefaultMonoFontName, _monoFontSize )
+		_defaultFont = Font.Open( App.DefaultFontName, _fontSize )
+		_defaultMonoFont = Font.Open( App.DefaultMonoFontName, _monoFontSize )
 
-		Local style:Style,state:Style
+		Local style:Style
+		Local state:Style
 		
-		style=Style.GetStyle( "" )
-		style.DefaultColor=_textColor
-		style.DefaultFont=_defaultFont
+		style = Style.GetStyle( "" )
+		style.DefaultColor = _textColor
+		style.DefaultFont = _defaultFont
 
 
 
+		'HelpSystem
+		style = New Style( "mojo.HelpSystem" )
+		style.DefaultColor = _panelColor
+		style.BackgroundColor = _borderColor
+		
+		
 		'Labeljl		
 		style = New Style( "mojo.Labeljl" )
 		style.DefaultColor = _textColor
@@ -186,7 +193,6 @@ Class ThemeInstance
 		style.Border = New Recti( -1,0,1,0 )
 
 		style.SetImage( "node:icons", Image.Load( "asset::mojox/ui-icons.png" ) )
-
 		style.SetImage( "node:buttons", Image.Load( "asset::mojox/ui-buttons.png" ) )
 
 		Local icon2 := LoadIcons( "asset::mojox/ui-find.png",30 )
@@ -233,36 +239,33 @@ Class ThemeInstance
 
 		
 		'Menu
-		style=New Style( "mojo.Menu" )
-		style.Padding=New Recti( -2,-2,2,2 )
-		style.Border=New Recti( -1,-1,1,1 )
-		style.BackgroundColor=_panelColor
-		style.BorderColor=_borderColor
+		style = New Style( "mojo.Menu" )
+		style.Padding = New Recti( -2,-2,2,2 )
+		style.Border = New Recti( -1,-1,1,1 )
+		style.BackgroundColor = _panelColor
+		style.BorderColor = _borderColor
 		
 		'MenuButton
-		style=New Style( "mojo.MenuButton", Style.GetStyle( "mojo.NewButton" ) )
+		style = New Style( "mojo.MenuButton", Style.GetStyle( "mojo.NewButton" ) )
 		style.SetImage( "node:icons", Image.Load( "asset::mojox/ui-icons.png" ) )
 
-
-		
 		'MenuBar
-		style=New Style( "mojo.MenuBar" )
-		style.Padding=New Recti( -2,-2,2,2 )
-		style.BackgroundColor=_panelColor
-
+		style = New Style( "mojo.MenuBar" )
+		style.Padding = New Recti( -2,-2,2,2 )
+		style.BackgroundColor = _panelColor
 
 		
 		'DockingView
-		style=New Style( "mojo.DockingView" )
+		style = New Style( "mojo.DockingView" )
 		
 		'DockView
-		style=New Style( "mojo.DockView" )
+		style = New Style( "mojo.DockView" )
 		
 		'DragKnob
-		style=New Style( "mojo.DragKnob" )
+		style = New Style( "mojo.DragKnob" )
 '		style.Padding=New Recti( -3,-3,3,3 )
-		style.Padding=New Recti( -5,-5,5,5 )
-		style.BackgroundColor=_panelColor
+		style.Padding = New Recti( -5,-5,5,5 )
+		style.BackgroundColor = _panelColor
 		
 '		state=style.AddState( "hover" )
 '		state.BackgroundColor=_hoverColor
@@ -288,13 +291,13 @@ Class ThemeInstance
 		
 		'ScrollView
 		style=New Style( "mojo.ScrollView" )
-    style.BackgroundColor = _backgroundColor
+		style.BackgroundColor = _backgroundColor
 		
 		
 		'ScrollBar
 		style=New Style( "mojo.ScrollBar" )
 '		style.BackgroundColor=_gutterColor
-    style.BackgroundColor = _backgroundColor
+		style.BackgroundColor = _backgroundColor
 '		style.BackgroundColor=_borderColor
 		
 		'ScrollKnob
@@ -314,55 +317,64 @@ Class ThemeInstance
 		style=New Style( "mojo.TabView" )
 		
 		'TabButton
-		style=New Style( "mojo.TabButton",Style.GetStyle( "mojo.NewButton" ) )
-		style.Border=New Recti( 0,-2,2,0 )
+		style = New Style( "mojo.TabButton",Style.GetStyle( "mojo.NewButton" ) )
+		style.Border = New Recti( 0,-2,2,0 )
 		
-		state=style.AddState( "selected" )
+		state = style.AddState( "selected" )
 '		state.BackgroundColor=_contentColor
 		state.BackgroundColor = _selectColor
 		
-		state=style.AddState( "hover" )
+		state = style.AddState( "hover" )
 		state.BackgroundColor = _hoverColor
 		
-		state=style.AddState( "active" )
+		state = style.AddState( "active" )
 '		state.BackgroundColor=_activeColor
 '		state.BackgroundColor = _hoverColor
 
 
-	
+		'TitleBar
+		style = New Style( "mojo.TitleBar" )
+		style.SetImage( "node:buttons", Image.Load( "asset::mojox/ui-buttons.png" ) )
+		style.BorderColor = _panelColor
+'		style.BackgroundColor = _panelColor
+		style.DefaultColor = _selectColor2
+		
 		
 		'HtmlView
-		style=New Style( "mojo.HtmlView" )
+		style = New Style( "mojo.HtmlView" )
 
 		'TreeView
-		style=New Style( "mojo.TreeView" )
+		style = New Style( "mojo.TreeView" )
 		style.SetImage( "node:expanded", Image.Load( "asset::mojox/treenode_expanded.png" ) )
 		style.SetImage( "node:collapsed", Image.Load( "asset::mojox/treenode_collapsed.png" ) )
 		style.SetImage( "node:icons", Image.Load( "asset::mojox/ui-icons.png" ) )
-'		style.BackgroundColor=_contentColor
-		style.BackgroundColor=_borderColor
-		style.DefaultColor=_textColor
-		style.Margin=New Recti( -2,-2,2,2 )
+		style.BorderColor = _contentColor
+		style.BackgroundColor = _borderColor
+		style.DefaultColor = _textColor
+'		style.Margin = New Recti( -2,-2,2,2 )
 
 		'ColorTreeView
 		style=New Style( "mojo.ColorTreeView" )
 		style.SetImage( "node:expanded", Image.Load( "asset::mojox/treenode_expanded.png" ) )
 		style.SetImage( "node:collapsed", Image.Load( "asset::mojox/treenode_collapsed.png" ) )
 		style.SetImage( "node:icons", Image.Load( "asset::mojox/ui-icons.png" ) )
-		style.BackgroundColor=_borderColor
-		style.DefaultColor=_textColor
+		style.BackgroundColor = _borderColor
+		style.DefaultColor = _selectColor2
+		style.BorderColor = _panelColor
 '		style.Margin=New Recti( -2,-2,2,2 )
-		style.Margin=New Recti( 0,0,2,2 )
-		style.Padding=New Recti( -2,-2,0,0 )
+		style.Margin = New Recti( 0,0,2,2 )
+		style.Padding = New Recti( -2,-2,0,0 )
 
 
 
-    'mx2Document
+		'mx2Document
 		style=New Style( "mojo.mx2Document" )
 		style.SetImage( "node:icons", Image.Load( "asset::mojox/ui-icons.png" ) )
+		style.DefaultFont=_defaultMonoFont
 		style.Padding=New Recti( -4,-4,4,4 )
 '		style.BackgroundColor=_contentColor
 		style.BackgroundColor=_borderColor
+		style.DefaultColor = new Color( .8, .8, .5 )
 
 		'TreeView
 '		style=New Style( "mojo.TreeView" )
@@ -373,7 +385,7 @@ Class ThemeInstance
 
 
 
-    'imageView
+		'imageView
 		style=New Style( "mojo.ImageView" )
 		style.SetImage( "node:buttons", Image.Load( "asset::mojox/ui-buttons.png" ) )
 		
@@ -391,7 +403,7 @@ Class ThemeInstance
 		style.Padding=New Recti( -4,-4,4,4 )
 '		style.BackgroundColor=_contentColor
 		style.BackgroundColor=_borderColor
-		style.DefaultColor=_textColor
+		style.DefaultColor = _textColor
 
 
 		
@@ -418,7 +430,7 @@ Class ThemeInstance
 		style.Padding=New Recti( -2,-2,4,4 )
 		style.BackgroundColor=_panelColor
 
-    'toolbar button
+		'toolbar button
 '		style=New Style( "mojo.ToolButton",Style.GetStyle( "mojo.Buttonjl" ) )
 '		style.Padding=New Recti( -2,-2,4,4 )
 '		style.Border = New Recti( -4,0,20,20 )
@@ -455,7 +467,7 @@ Class ThemeInstance
 
 	
 	Method LoadIcons:Image[]( path:String, size:Int )
-'    print "load icon="+path+" size="+size
+		'print "load icon="+path+" size="+size
     
 		Local pixmap := Pixmap.Load( path )
 		If Not pixmap Return Null

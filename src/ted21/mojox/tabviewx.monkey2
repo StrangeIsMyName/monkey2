@@ -7,7 +7,7 @@ Class TabButtonX Extends Button
 
 	Method New( text:String, view:View )
 		Super.New( text )
-    Style = Style.GetStyle( "mojo.TabButtonjl" )
+		Style = Style.GetStyle( "mojo.TabButtonjl" )
 		TextGravity = New Vec2f( 0,.5 )
 		_view = view
 	End
@@ -19,21 +19,20 @@ Class TabButtonX Extends Button
 	End
 
 
-  Property DrawIcon:String()
-    Return _drawIcon
-  Setter( drawIcon:String )
-    _drawIcon = drawIcon
-  End
+	Property DrawIcon:String()
+		Return _drawIcon
+	Setter( drawIcon:String )
+		_drawIcon = drawIcon
+	End
 
 
 	
-'#rem
 	Method OnRender( canvas:Canvas ) Override
 		Local x := 0
 		Local w := 0
 		
-'    Local drawIcon:Int = 0
-    Local icons := _icons
+		'    Local drawIcon:Int = 0
+		Local icons := _icons
 
 		If Icon
 			Local y := (MeasuredSize.y - Icon.Height)/2'
@@ -48,10 +47,10 @@ Class TabButtonX Extends Button
 			w += CheckMark.Width
 		Endif
 
-    If icons And _drawIcon > 0 Then
-      canvas.Color = Color.White
-      canvas.DrawImageIcon( icons, 3,5,  _drawIcon, 80 )
-      x += 12
+		If icons And _drawIcon > 0 Then
+			canvas.Color = Color.White
+			canvas.DrawImageIcon( icons, 3,5,  _drawIcon, 80 )
+			x += 12
 		End if
 		
 		If Text
@@ -66,32 +65,32 @@ Class TabButtonX Extends Button
 		
 		_mousex = 0
 
-    If _hover And _mouse.x > width-15 Then
-      If _mousedown Then
-        canvas.Color = New Color( 1,0,0, 1 )
-        _mousex = _mouse.x
-      else
-        canvas.Color = New Color( 0.7,0,0, 1 )
-      End if
-      canvas.DrawRect ( width-18,4,  15,MeasuredSize.y-9 )
-      canvas.Color = New Color( 1,1,1, 1 )
-    else  
-      canvas.Color = New Color( 1,1,1, 0.5 )
-    End If
+		If _hover And _mouse.x > width-15 Then
+			If _mousedown Then
+				canvas.Color = New Color( 1,0,0, 1 )
+				_mousex = _mouse.x
+			else
+				canvas.Color = New Color( 0.7,0,0, 1 )
+			End if
+			canvas.DrawRect ( width-18,4,  15,MeasuredSize.y-9 )
+			canvas.Color = New Color( 1,1,1, 1 )
+		else  
+			canvas.Color = New Color( 1,1,1, 0.5 )
+		End If
     
 		canvas.DrawText( "X", width-15, 5 )
 
 		canvas.Color = New Color( 1,1,1, 0.05 )
-    canvas.DrawRect ( 1,0, width-2,ypos )
+		canvas.DrawRect ( 1,0, width-2,ypos )
 
 		canvas.Color = New Color( 0,0,0, 0.3 )
-    canvas.DrawLine ( 0,ypos, 0, 0)
-    canvas.DrawLine ( width,ypos, width, 0)
+		canvas.DrawLine ( 0,ypos, 0, 0)
+		canvas.DrawLine ( width,ypos, width, 0)
 
 
 		width = width + 1
 		
-    canvas.DrawLine ( 0,0, width, 0)
+		canvas.DrawLine ( 0,0, width, 0)
 		
 		canvas.Color = New Color( 0,.5,1 )
 		canvas.DrawRect(0,ypos, width, 2)
@@ -120,12 +119,11 @@ Class TabButtonX Extends Button
 		
 		Return size
 	End
-'#end
 
 
 
 	Method OnValidateStyle() Override
-'    print "validate"
+	'    print "validate"
 '		_collapsedIcon = Style.GetImage( "node:collapsed" )
 '		_expandedIcon = Style.GetImage( "node:expanded" )
 		_icons = Style.GetImage( "node:icons" )
@@ -140,9 +138,9 @@ Class TabButtonX Extends Button
 Private
 	
 	Field _view:View
-  Field _mousex:Int
+	Field _mousex:Int
   
-  Field _drawIcon:Int = 0
+	Field _drawIcon:Int = 0
   
 	Field _icons:Image
 End
@@ -174,8 +172,8 @@ Class TabViewX Extends View
 
 
 	Property GetMouseX:Int()
-    If _current Then Return _current._mousex
-    Return 0
+		If _current Then Return _current._mousex
+		Return 0
 	End
 
 	
@@ -286,8 +284,7 @@ Private
 
 	
 	Method MakeCurrent( tab:TabButtonX )
-'    print "tabx="+tab._mousex
-   ' DebugStop()
+		'    print "tabx="+tab._mousex
 '		If tab = _current Return
 		
 		If _current 
@@ -308,8 +305,7 @@ Private
 	
 	
 	Method OnRender( canvas:Canvas ) Override
-'#rem
-    If Not(_current) Then Return
+		If Not(_current) Then Return
     
  		Local BGColor := New Color( 0.2, 0.2, 0.2 )
 '		Local BlackColor := New Color( 0.06, 0.06, 0.06 )
@@ -317,13 +313,14 @@ Private
 
 		
 		canvas.Color = BGColor
-    canvas.DrawRect( 0, 1, _current.View.Container.Frame.Width, _current.View.Container.Frame.Height-1 )
+		canvas.DrawRect( 0, 1, _current.View.Container.Frame.Width, _current.View.Container.Frame.Height-1 )
 
-    'print Height-1
+		'print Height-1
 		canvas.Color = HilightColor'BlackColor
-'    canvas.DrawLine( 0, 25, _current.View.Container.Frame.Width, 25 )
-    canvas.DrawRect( 0, 24, _current.View.Container.Frame.Width, 2 )
-'#end    
+		'    canvas.DrawLine( 0, 25, _current.View.Container.Frame.Width, 25 )
+'		Print "tabx height= "+Height -_current.View.Container.Frame.Height
+		Local ht:int =  Height - _current.View.Container.Frame.Height
+		canvas.DrawRect( 0, ht-2, _current.View.Container.Frame.Width, 2 )
 	End
 	
 		

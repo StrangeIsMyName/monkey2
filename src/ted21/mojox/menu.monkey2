@@ -115,6 +115,11 @@ End
 
 Class Menu Extends DockingView
 
+	Property Label:String()
+		Return _label
+	End
+
+
 	Method New( label:String )
 		_label = label
 		Visible = False
@@ -124,13 +129,6 @@ Class Menu Extends DockingView
 	End
 
 
-	
-	Property Label:String()
-		Return _label
-	End
-
-
-	
 	Method Clear()
 		Super.ClearViews()
 	End

@@ -42,6 +42,8 @@ Class StatusBar Extends Button
 	Method SetCursor( line:int, column:int, chr:int )
 		_displayKind = STATUSBARKIND_TEXT
 		
+		_display = STATUSBAR_NORMAL
+		
 		_line = line
 		_column = column
 		_chr = chr

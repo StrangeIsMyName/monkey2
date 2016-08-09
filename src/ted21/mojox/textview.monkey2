@@ -1742,21 +1742,6 @@ Protected
 			
 		Next
 		
-#rem		
-		If _flags & TextViewFlags.ShowLineNumbers
-		
-			Local GutterColor:=New Color( .9,.9,.9,1 )
-			
-			canvas.SetColor( GutterColor.r,GutterColor.g,GutterColor.b,GutterColor.a )
-			canvas.DrawRect( ClipRect.X,ClipRect.Y,_gutterw-_charw,ClipRect.Height )
-		
-			canvas.SetColor( Style.DefaultColor.r,Style.DefaultColor.g,Style.DefaultColor.b,Style.DefaultColor.a*.5 )
-
-			For Local i:=firstVisLine Until lastVisLine
-				canvas.DrawText( (i+1),ClipRect.X+_gutterw-_charh,i*_charh,1,0 )
-			Next
-		End
-#end
 	End
 
 

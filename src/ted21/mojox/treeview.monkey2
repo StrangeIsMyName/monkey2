@@ -78,6 +78,11 @@ Const NODEKIND_SHIFT:Int = 68
 Const NODEKIND_CONTROL:Int = 69
 Const NODEKIND_ALT:Int = 70
 Const NODEKIND_PREFS:Int = 71
+Const NODEKIND_CHECK:Int = 72
+Const NODEKIND_INDEX:Int = 73
+Const NODEKIND_SEARCHGOOD:Int = 74
+Const NODEKIND_SEARCHOK:Int = 75
+Const NODEKIND_SEARCHBAD:Int = 76
 
 
 
@@ -92,6 +97,8 @@ Class TreeView Extends View
 
 
 	Class Node
+
+		Field _children := New Stack<Node>
 	
 '		Method New( label:String, kind:Int, parent:Node = Null, index:Int = -1 )
 		Method New( label:String, kind:Int, parent:Node, index:Int = -1)
@@ -149,6 +156,16 @@ Class TreeView Extends View
 
 
 
+		Property Page:String()
+			Return _page
+		Setter( page:String )
+			_page = page
+			
+			Dirty()
+		End
+
+
+
 		Property Kind:String()
 			Return _kind
 		Setter( kind:String )
@@ -200,7 +217,7 @@ Class TreeView Extends View
 		Property Expanded:Bool()
 			Return _expanded
 		Setter( expanded:Bool )
-			_expanded=expanded
+			_expanded = expanded
 			
 			Dirty()
 		End
@@ -218,7 +235,7 @@ Class TreeView Extends View
 		End
 
 
-		
+
 		Method AddChild( node:Node, index:Int=-1 )
 			If node._parent Return
 			
@@ -238,18 +255,16 @@ Class TreeView Extends View
 
 
 		
-    Method AddChild( label:String, kind:Int, index:Int, line:int)
-
+		Method AddChild( label:String, kind:Int, index:Int, line:int)
 			_children.Insert( index, self )
 
-      Label = label
-      Kind = kind
-      Line = line
-      If index > -1 Then
-        Index = index
-      End if
-
-    end method
+			Label = label
+			Kind = kind
+			Line = line
+			If index > -1 Then
+				Index = index
+			End if
+		end method
 
 
 
@@ -311,12 +326,12 @@ Class TreeView Extends View
 
 
 		
-		Private
+	Private
 
 		Field _parent:Node
-		Field _children := New Stack<Node>
 		
 		Field _label:String
+		Field _page:String
 		Field _index:int
 		Field _expanded:Bool
 		Field _kind:int
@@ -368,6 +383,7 @@ Class TreeView Extends View
 '		print "  SHOW"
 '		ShowLine( _rootNode)
 	end Method
+	
 	
 	
 	method RemoveLine( parent:Node, node:Node, line:int )

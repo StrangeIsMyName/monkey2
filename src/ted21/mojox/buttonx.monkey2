@@ -5,8 +5,6 @@ Namespace mojox
 
 Class Buttonx Extends Label
 
-
-
 	Method New()
 		Layout = "float"
 		Style = Style.GetStyle( "mojo.Buttonx" )
@@ -18,8 +16,8 @@ Class Buttonx Extends Label
 	Method New( text:String, width:Int, height:int )
 		Self.New()
 
-    _width = width - 4
-    _height = height
+		_width = width - 4
+		_height = height
     
 		Text = text
 	End
@@ -29,8 +27,8 @@ Class Buttonx Extends Label
 	Method New( action:Action, text:String, width:Int, height:int )
 		Self.New()
 
-    _width = width - 4
-    _height = height
+		_width = width - 4
+		_height = height
     
 		Text = text
 
@@ -106,37 +104,37 @@ Protected
 
 
 	Method OnRender( canvas:Canvas ) Override
-    Local selectedColor := New Color ( 0,.4,.9, 1 )
-    Local selectedColor2 := New Color ( 0,.4,.9, 0.5 )
-    
-    If Text <> "" then
-      canvas.Color = Color.White
-      canvas.DrawText( Text, 10, 4 )
-      canvas.DrawText( Text, 11, 4 )
-    Endif
-
-
-    If _imageButton > -1 then
-				canvas.Color = Color.White
-				canvas.DrawImageIcon( _buttons, 2,7,  _imageButton, 24)
-    end If
-    
-    if _live = false then Return
-    
-    if Hover Then
-      canvas.Color = selectedColor2
-      canvas.DrawRect(0,0, Width, Height)
-    end If
-    
-    If Selected then
-      canvas.Color = selectedColor'Style.checked
-      
-      canvas.DrawRect(0,0, Width, 3)
-      canvas.DrawRect(0,0, 3, Height)
-      canvas.DrawRect(0,Height-3, Width, 3)
-      canvas.DrawRect(Width-3,0, 3, Height)
-     End if
-  End 
+		Local selectedColor := New Color ( 0,.4,.9, 1 )
+		Local selectedColor2 := New Color ( 0,.4,.9, 0.5 )
+		
+		If Text <> "" then
+			canvas.Color = Color.White
+			canvas.DrawText( Text, 10, 4 )
+			canvas.DrawText( Text, 11, 4 )
+		Endif
+		
+		
+		If _imageButton > -1 then
+			canvas.Color = Color.White
+			canvas.DrawImageIcon( _buttons, 2,7,  _imageButton, 24)
+		end If
+		
+		if _live = false then Return
+		
+		if Hover Then
+			canvas.Color = selectedColor2
+			canvas.DrawRect(0,0, Width, Height)
+		end If
+		
+		If Selected then
+			canvas.Color = selectedColor'Style.checked
+		
+			canvas.DrawRect(0,0, Width, 3)
+			canvas.DrawRect(0,0, 3, Height)
+			canvas.DrawRect(0,Height-3, Width, 3)
+			canvas.DrawRect(Width-3,0, 3, Height)
+		End if
+	End 
 
 	
 	
@@ -154,28 +152,28 @@ Protected
 	
 	Method OnMouseEvent( event:MouseEvent ) Override
 		Select event.Type
-      Case EventType.MouseDown
-        _org=event.Location
-        _active = True
-        _mousedown = True
-        
-      Case EventType.MouseUp
-        If _active And _hover
-          _mousedown = False
-          
-          Clicked()
-        Endif
-        _active = False
-
-      Case EventType.MouseEnter
-        _hover = True
-
-      Case EventType.MouseLeave
-        _hover = False
-
-      Case EventType.MouseMove
-        _mouse = event.Location
-        If _active Dragged( event.Location-_org )
+			Case EventType.MouseDown
+				_org=event.Location
+				_active = True
+				_mousedown = True
+				
+			Case EventType.MouseUp
+				If _active And _hover
+					_mousedown = False
+				
+					Clicked()
+				Endif
+				_active = False
+				
+			Case EventType.MouseEnter
+				_hover = True
+				
+			Case EventType.MouseLeave
+				_hover = False
+				
+			Case EventType.MouseMove
+				_mouse = event.Location
+				If _active then Dragged( event.Location-_org )
 		End
 		
 		UpdateStyleState()
@@ -205,8 +203,6 @@ Protected
 			StyleState=""
 		Endif
 	End
-
-
 
 
 End

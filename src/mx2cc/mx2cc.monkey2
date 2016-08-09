@@ -53,7 +53,7 @@ Function Main()
 	
 	If args.Length<2
 
-		Print "Usage: mx2cc makeapp|makemods|makedocs [-run] [-clean] [-verbose] [-target=desktop|emscripten] [-config=debug|release] source|modules..."
+		Print "Usage: mx2cc makeapp|makemods|makedocs|checkapp [-run] [-clean] [-verbose] [-target=desktop|emscripten] [-config=debug|release] source|modules..."
 
 #If __CONFIG__="release"
 		exit_(0)
@@ -70,6 +70,8 @@ Function Main()
 		Select cmd
 		Case "makeapp"
 			MakeApp( args )
+		Case "checkapp"
+			CheckApp( args )
 		Case "makemods"
 			MakeMods( args )
 		Case "makedocs"
@@ -86,13 +88,51 @@ Function Main()
 	
 End
 
-Function MakeApp( args:String[] )
+Function CheckApp( args:String[] )
 
 	Local opts:=New BuildOpts
 	opts.productType="app"
 	opts.appType="gui"
 	opts.target="desktop"
 	opts.config="debug"
+	opts.clean=False
+	opts.fast=True
+	opts.run=true
+	opts.verbose=0
+	
+	args=ParseOpts( opts,args )
+	
+	If args.Length<>1 Fail( "Invalid app source file" )
+	
+	Local cd:=CurrentDir()
+	ChangeDir( StartDir )
+	Local srcPath:=RealPath( args[0].Replace( "\","/" ) )
+	ChangeDir( cd )
+	
+	opts.mainSource=srcPath
+	
+	Print ""
+	Print "***** Checking app '"+opts.mainSource+"' *****"
+	Print ""
+
+	Local builder:=New Builder( opts )
+	
+	builder.Parse()
+	If builder.errors.Length Return
+	
+	builder.Semant()
+	If builder.errors.Length Return
+	
+	Print "Application Checked"
+End
+
+Function MakeApp( args:String[] )
+
+	Local opts:=New BuildOpts
+	opts.productType="app"
+	opts.appType="gui"
+	opts.target="desktop"
+	opts.config="release"
 	opts.clean=False
 	opts.fast=True
 	opts.run=true
@@ -150,7 +190,12 @@ Function MakeMods( args:String[] )
 	For Local modid:=Eachin args
 	
 		Local path:="modules/"+modid+"/"+modid+".monkey2"
-		If GetFileType( path )<>FILETYPE_FILE Fail( "Module file '"+path+"' not found" )
+		If GetFileType( path )<>FILETYPE_FILE Then
+			path = "modules/"+modid+"/"+modid+".mx2"
+			If GetFileType( path )<>FILETYPE_FILE Then
+				Fail( "Module file '"+path+"' not found" )
+			end If
+		end if
 	
 		Print ""
 		Print "***** Making module '"+modid+"' *****"
@@ -197,8 +242,17 @@ Function MakeDocs( args:String[] )
 	
 	For Local modid:=Eachin args
 
+'		Local path:="modules/"+modid+"/"+modid+".monkey2"
+'		If GetFileType( path )<>FILETYPE_FILE Fail( "Module file '"+path+"' not found" )
+
 		Local path:="modules/"+modid+"/"+modid+".monkey2"
-		If GetFileType( path )<>FILETYPE_FILE Fail( "Module file '"+path+"' not found" )
+		If GetFileType( path )<>FILETYPE_FILE Then
+			path = "modules/"+modid+"/"+modid+".mx2"
+			If GetFileType( path )<>FILETYPE_FILE Then
+				Fail( "Module file '"+path+"' not found" )
+			end If
+		end if
+	
 	
 		Print ""
 		Print "***** Doccing module '"+modid+"' *****"

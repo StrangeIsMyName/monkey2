@@ -7,7 +7,7 @@ Class TabButton Extends Button
 
 	Method New( text:String, view:View )
 		Super.New( text )
-    Style = Style.GetStyle( "mojo.TabButtonjl" )
+		Style = Style.GetStyle( "mojo.TabButtonjl" )
 		TextGravity = New Vec2f( 0,.5 )
 		_view = view
 	End
@@ -18,7 +18,6 @@ Class TabButton Extends Button
 		Return _view
 	End
 	
-'#rem
 	Method OnRender( canvas:Canvas ) Override
 		Local x := 0
 		Local w := 0
@@ -47,16 +46,16 @@ Class TabButton Extends Button
 		Local width := RenderStyle.DefaultFont.TextWidth( Text ) + 20
 
 		canvas.Color = New Color( 1,1,1, 0.05 )
-    canvas.DrawRect ( 1,0, width-2,ypos )
+		canvas.DrawRect ( 1,0, width-2,ypos )
 
 		canvas.Color = New Color( 0,0,0, 0.3 )
-    canvas.DrawLine ( 0,ypos, 0, 0)
-    canvas.DrawLine ( width,ypos, width, 0)
+		canvas.DrawLine ( 0,ypos, 0, 0)
+		canvas.DrawLine ( width,ypos, width, 0)
 
 
 		width = width + 1
 		
-    canvas.DrawLine ( 0,0, width, 0)
+		canvas.DrawLine ( 0,0, width, 0)
 		
 		canvas.Color = New Color( 0,.5,1 )
 		canvas.DrawRect(0,ypos, width, 2)
@@ -84,9 +83,8 @@ Class TabButton Extends Button
 		
 		Return size
 	End
-'#end
 	
-	Private
+Private
 	
 	Field _view:View
 
@@ -227,21 +225,19 @@ Class TabView Extends View
 	
 	
 	Method OnRender( canvas:Canvas ) Override
-'#rem    
-    If Not(_current) Then Return
+		If Not(_current) Then Return
  		Local BGColor := New Color( 0.2, 0.2, 0.2 )
 '		Local BlackColor := New Color( 0.06, 0.06, 0.06 )
 		Local HilightColor := New Color( 0, 0.5, 1 )
 
 		
 		canvas.Color = BGColor
-    canvas.DrawRect( 0, 1, _current.View.Container.Frame.Width, _current.View.Container.Frame.Height-1 )
+		canvas.DrawRect( 0, 1, _current.View.Container.Frame.Width, _current.View.Container.Frame.Height-1 )
 
-    'print Height-1
+		'print Height-1
 		canvas.Color = HilightColor'BlackColor
-'    canvas.DrawLine( 0, 25, _current.View.Container.Frame.Width, 25 )
-    canvas.DrawRect( 0, 24, _current.View.Container.Frame.Width, 2 )
-'    #end
+		Local ht:int =  Height - _current.View.Container.Frame.Height
+		canvas.DrawRect( 0, ht-2, _current.View.Container.Frame.Width, 2 )
 	End
 	
 		

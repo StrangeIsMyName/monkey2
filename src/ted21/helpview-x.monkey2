@@ -79,7 +79,7 @@ Class HelpView Extends DockingView
 			Local node := Cast<HelpTree.Node>( tnode )
 			If Not node Return
 			
-			Go( node.Page )
+'			Go( node.Page )
 		End
 
 		
@@ -195,7 +195,7 @@ Class HelpTree Extends TreeView
 		Method New( page:String, parent:TreeView.Node, tree:HelpTree )
 			Super.New( page, NODEKIND_NONE, parent )
 
-			_page = page
+			Page = page
 		End
 
 
@@ -242,7 +242,7 @@ Class HelpTree Extends TreeView
 				Local data := obj["data"].ToObject()
 				Local page := data["page"].ToString()
 				tree._index.Add( page )
-				_page = page
+				Page = page
 			Endif
 			
 			If obj.Contains( "children" )
@@ -262,17 +262,17 @@ Class HelpTree Extends TreeView
 
 
 		
-		Property Page:String()
-			Return _page
-		End
+'		Property Page:String()
+'			Return _page
+'		End
 
 
 		
-		Private
+	Private
 		
 
 
-		Field _page:String
+'		Field _page:String
 	End
 
 

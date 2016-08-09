@@ -59,7 +59,7 @@ Class HtmlView Extends View
 
 	
 	Method Go( url:String )
-		'print url
+		print "htmlview gourl= "+url
 		
 		If url.Contains( "#" ) Then
 			Return
