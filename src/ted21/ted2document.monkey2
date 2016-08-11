@@ -23,6 +23,12 @@ Class Ted2Document
 
 
 	
+	Property Time:Long()
+		Return _time
+	End
+
+
+
 	Property View:View()
 		If Not _view then _view = OnCreateView()
 		
@@ -46,7 +52,10 @@ Class Ted2Document
 	Method Load:Bool()
 		If Not OnLoad() Return False
 
-		Dirty=False
+		Dirty = False
+		
+		_time =  GetFileTime( _path )
+		Print _time +" "+ _path
 		
 		Return True
 	End
@@ -58,7 +67,7 @@ Class Ted2Document
 		
 		If Not OnSave() Return False
 		
-		Dirty=False
+		Dirty = False
 
 		Return True
 	End
@@ -66,9 +75,9 @@ Class Ted2Document
 
 	
 	Method Rename( path:String )
-		_path=path
+		_path = path
 		
-		Dirty=True
+		Dirty = True
 	End
 
 
@@ -112,5 +121,6 @@ Private
 	Field _dirty:Bool
 	Field _path:String
 	Field _view:View
+	Field _time:Long
 	
 End

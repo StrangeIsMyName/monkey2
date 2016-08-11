@@ -40,6 +40,8 @@ Class MainWindowInstance Extends Window
 	
 	Field _editUndo:Action
 	Field _editRedo:Action
+	Field _editBack:Action
+	Field _editForward:Action
 	Field _editCut:Action
 	Field _editCopy:Action
 	Field _editPaste:Action
@@ -52,6 +54,7 @@ Class MainWindowInstance Extends Window
 	
 	Field _buildDebug:Action
 	Field _buildRelease:Action
+	Field _buildCheck:Action
 	Field _buildForceStop:Action
 	Field _buildLockFile:Action
 	Field _buildNextError:Action
@@ -77,9 +80,9 @@ Class MainWindowInstance Extends Window
 	Field _cmdEscape:Action
 	Field _showConsole:bool = true
 	
-  field _prefsButton:Buttonx
+	Field _prefsButton:Buttonx
 	Field _showPrefs:bool = False
-  field _helpButton:Buttonx
+	field _helpButton:Buttonx
 	Field _showHelp:bool = false
 
 	Field _htmlHelpView:HtmlView
@@ -112,7 +115,9 @@ Class MainWindowInstance Extends Window
 	Field _projectView:ProjectView
 	Field _codeView:CodeView
 	Field _debugView:DebugView
-	Field _helpView:HelpView
+	
+'	Field _helpView:HelpView
+	Field _helpView:HelpWindowView
 	
 	Field _console:Console
 	
@@ -342,6 +347,22 @@ Class MainWindowInstance Extends Window
 
 
 	
+	Method OnEditBack()
+		Local textView := Cast<TextView>( App.KeyView )
+		
+		If textView textView.Back()
+	End
+
+
+	
+	Method OnEditForward()
+		Local textView := Cast<TextView>( App.KeyView )
+		
+		If textView textView.Forward()
+	End
+
+
+
 	Method OnEditCut()
 		Local textView:=Cast<TextView>( App.KeyView )
 		
@@ -387,9 +408,22 @@ Class MainWindowInstance Extends Window
 
 
 	Method OnQuickHelp()
-'		local tag := _currentTextView.TagUnderCursor()
-'		_browser.CurrentView = _helpView
-'		_helpView.Find( tag )
+		local tag := _currentTextView.TagUnderCursor()
+		_helpView.ContentView = _helpView._searchView
+		_browser.CurrentView = _helpView
+		_helpView._searchView.Find( tag )
+	End
+
+
+	Method OnBuildCheck()
+		BuildCheck( "release" )
+		
+'		For Local doc := Eachin _openDocs
+'			Local mx2Doc := Cast<Mx2Document>( doc )
+'			If mx2Doc Then
+'				Print mx2Doc.Path
+'			End If
+'		Next
 	End
 
 
@@ -591,9 +625,9 @@ Class MainWindowInstance Extends Window
 			i=tvtext.FindLast( text )
 		Else
 			Repeat
-				Local n:=tvtext.Find( text,i+text.Length )
-				If n>=cursor Exit
-				i=n
+				Local n := tvtext.Find( text,i+text.Length )
+				If n >= cursor Exit
+				i = n
 			Forever
 		End
 		
@@ -694,6 +728,34 @@ Class MainWindowInstance Extends Window
 	
 	
 	Method OnEscape()
+		If _showHelp Then
+			OnPanelHelp()
+			Return
+		End if
+		If _fileMenu.Visible Then
+			_fileMenu.Close()
+			Return
+		End If
+		If _editMenu.Visible Then
+			_editMenu.Close()
+			Return
+		End If
+		If _buildMenu.Visible Then
+			_buildMenu.Close()
+			Return
+		End If
+		If _scriptMenu.Visible Then
+			_scriptMenu.Close()
+			Return
+		End If
+		If _panelMenu.Visible Then
+			_panelMenu.Close()
+			Return
+		End If
+		If _helpMenu.Visible Then
+			_helpMenu.Close()
+			Return
+		End If
 		If _findDialog.Visible then
 			_findDialog.Close()
 			UpdateKeyView()
@@ -801,6 +863,16 @@ Class MainWindowInstance Extends Window
 		_editRedo.HotKey=Key.Y
 		_editRedo.HotKeyModifiers = _modifier
 		_editRedo.Triggered=OnEditRedo
+
+		_editBack = New Action( "Back" )
+		_editBack.HotKey = Key.Comma
+		_editBack.HotKeyModifiers = _modifier
+		_editBack.Triggered = OnEditBack
+		
+		_editForward=New Action( "Forward" )
+		_editForward.HotKey = Key.Period
+		_editForward.HotKeyModifiers = _modifier
+		_editForward.Triggered = OnEditForward
 		
 		_editCut=New Action( "Cut" )
 '		_editCut.HotKey=Key.X
@@ -867,6 +939,11 @@ Class MainWindowInstance Extends Window
 		_buildRelease=New Action( "Release" )
 		_buildRelease.HotKey=Key.F6
 		_buildRelease.Triggered=OnBuildRelease
+
+		_buildCheck=New Action( "Check" )
+		_buildCheck.HotKey=Key.B
+		_buildCheck.HotKeyModifiers = _modifier
+		_buildCheck.Triggered=OnBuildCheck
 		
 		_buildForceStop=New Action( "Force Stop" )
 		_buildForceStop.HotKey=Key.Escape
@@ -999,7 +1076,7 @@ Class MainWindowInstance Extends Window
 		_fileMenu.AddAction( _fileNextFile )
 		_fileMenu.AddAction( _filePrevFile )
 		_fileMenu.AddSeparator()
-		_fileMenu.AddAction( _fileOpenProject )
+		_fileMenu.AddAction( _fileOpenProject, NODEKIND_PROJECT )
 		_fileMenu.AddSubMenu( _closeProject )
 		_fileMenu.AddAction( _fileProjectRefresh )
 		_fileMenu.AddSeparator()
@@ -1027,6 +1104,8 @@ Class MainWindowInstance Extends Window
 		_buildMenu=New Menu( "Build" )
 		_buildMenu.AddAction( _buildDebug, NODEKIND_RUNDEBUG )
 		_buildMenu.AddAction( _buildRelease, NODEKIND_RUN )
+		_buildMenu.AddSeparator()
+		_buildMenu.AddAction( _buildCheck,  NODEKIND_CHECK )
 		_buildMenu.AddSeparator()
 		_buildMenu.AddAction( _buildNextError )
 		_buildMenu.AddSeparator()
@@ -1100,33 +1179,38 @@ Class MainWindowInstance Extends Window
 		_fieldButton.ImageButton = 6'NODEKIND_SAVEAS
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-		 _fieldButton = New Buttonx( "", 40, 40)
-		 _fieldButton.Live = false
-		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
+			_fieldButton = New Buttonx( "", 40, 40)
+			_fieldButton.Live = false
+			_fieldButton.ImageButton = 10'NODEKIND_VLINE
 			_menuBar.AddView( _fieldButton,"left",30, false )
 
-'    _actionField = New Action( "method" )
-'    _actionField.Triggered = Lambda()
-'			OnEditUndo()
-'		end
-'   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-'   _fieldButton.ImageIcon = NODEKIND_UNDO
-'		_menuBar.AddView( _fieldButton,"left",40, false )
+		_fieldButton = New Buttonx( _editBack, "", 40, 40)
+		_fieldButton.ImageButton = 19
+		_menuBar.AddView( _fieldButton,"left",40, false )
+		
+		_fieldButton = New Buttonx( _editForward, "", 40, 40)
+		_fieldButton.ImageButton = 20
+		_menuBar.AddView( _fieldButton,"left",40, false )
 
-'    _actionField = New Action( "method" )
-'    _actionField.Triggered = Lambda()
-'			OnEditRedo()
-'		end
-'   _fieldButton = New Buttonx( _actionField, "", 40, 40)
-'   _fieldButton.ImageIcon = NODEKIND_REDO
-'		_menuBar.AddView( _fieldButton,"left",40, false )
+			_fieldButton = New Buttonx( "", 40, 40)
+			_fieldButton.Live = false
+			_fieldButton.ImageButton = 10'NODEKIND_VLINE
+			_menuBar.AddView( _fieldButton,"left",30, false )
+
+		_actionField = New Action( "check" )
+		_actionField.Triggered = Lambda()
+			OnBuildCheck()
+		End
+		_fieldButton = New Buttonx( _actionField, "", 40, 40)
+		_fieldButton.ImageButton = 21
+		_menuBar.AddView( _fieldButton,"left",40, false )
 
 '		 _fieldButton = New Buttonx( "", 40, 40)
 '		 _fieldButton.Live = false
 '		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
 '			_menuBar.AddView( _fieldButton,"left",30, false )
 
-		_actionField = New Action( "method" )
+		_actionField = New Action( "run" )
 		_actionField.Triggered = Lambda()
 			OnBuildRelease()
 		end
@@ -1134,7 +1218,7 @@ Class MainWindowInstance Extends Window
 		_fieldButton.ImageButton = 8'NODEKIND_RUN
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-		_actionField = New Action( "method" )
+		_actionField = New Action( "debug" )
 		_actionField.Triggered = Lambda()
 			OnBuildDebug()
 		end
@@ -1142,7 +1226,7 @@ Class MainWindowInstance Extends Window
 		_fieldButton.ImageButton = 9'NODEKIND_RUNDEBUG
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-		_actionField = New Action( "method" )
+		_actionField = New Action( "compile stop" )
 		_actionField.Triggered = Lambda()
 			OnBuildForceStop()
 		end
@@ -1150,9 +1234,9 @@ Class MainWindowInstance Extends Window
 		_fieldButton.ImageButton = 17'NODEKIND_SAVEAS
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
-		 _fieldButton = New Buttonx( "", 40, 40)
-		 _fieldButton.Live = false
-		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
+			_fieldButton = New Buttonx( "", 40, 40)
+			_fieldButton.Live = false
+			_fieldButton.ImageButton = 10
 			_menuBar.AddView( _fieldButton,"left",30, false )
 
 
@@ -1160,15 +1244,14 @@ Class MainWindowInstance Extends Window
 		_menuBar.AddView( _findField,"left",180, false )
 		_findField.EnterHit = Lambda()
 			print "find "+_findField.Text
-		end
-
+		End
 		local _actionFind:Action
 		_actionFind = New Action( "find" )
 		_actionFind.Triggered = Lambda()
 			print "find "+_findField.Text
 		end
 		_fieldButton = New Buttonx( _actionFind, "", 40, 40)
-		_fieldButton.ImageButton = 3'NODEKIND_FIND
+		_fieldButton.ImageButton = 3
 		_menuBar.AddView( _fieldButton,"left",40, false )
 
 
@@ -1217,7 +1300,7 @@ Class MainWindowInstance Extends Window
 
     
 		_debugView = New DebugView
-		_helpView = New HelpView
+		_helpView = New HelpWindowView
 		_helpView.PageClicked = Lambda( url:string )
 			if url <> "" then
 				'print "goto "+url
@@ -1236,12 +1319,6 @@ Class MainWindowInstance Extends Window
 		_browser.CurrentView = _projectView
 		_browser.CurrentChanged = Lambda()
 		'print "browser changed"
-
-
-
-
-
-
 #rem
 		select _browser.CurrentView
 			case _helpView
@@ -1267,10 +1344,7 @@ Class MainWindowInstance Extends Window
 #end		
 '			if _browser.CurrentView = _codeView Then
 				'print "CODE VIEW"
-				
 				'_codeView._docker.ContentView
-				
-		
 '			end if
 		end 
 		
@@ -1353,19 +1427,25 @@ Class MainWindowInstance Extends Window
 		Endif
 
 		App.Idle += AppIdle
-		
+
+		_console.Visible = _showConsole
+
 		Update()
-		
+
 		If Not _docTabber.Count OnHelpAbout()
-		
+
 	End
 
 
-	
+
 	Method OnWindowEvent( event:WindowEvent ) Override
 		Select event.Type
+			Case EventType.WindowGainedFocus
+				UpdateFileTimes()
+				
 			Case EventType.WindowClose
 				_fileQuit.Trigger()
+				
 			Default
 				Super.OnWindowEvent( event )
 		End
@@ -1373,6 +1453,25 @@ Class MainWindowInstance Extends Window
 
 
 
+	Method UpdateFileTimes()
+		For Local doc := Eachin _openDocs
+			If doc <> Null
+				Local path := doc.Path
+				print doc.Time+" "+GetFileTime( path )+"  "+path
+				If doc.Time < GetFileTime( path ) Then
+'					doc.Load()
+'					doc.DirtyChanged = Lambda()
+'						UpdateTabLabel( doc )
+'					End
+					MakeCurrent( Cast<Ted2Document>( doc ) )
+'					SaveDocument( doc )
+				End
+			End If
+		Next
+	End
+	
+	
+	
 	Method ToRecti:Recti( value:JsonValue )
 		Local json:=value.ToArray()
 		Return New Recti( json[0].ToNumber(),json[1].ToNumber(),json[2].ToNumber(),json[3].ToNumber() )
@@ -1488,7 +1587,7 @@ Class MainWindowInstance Extends Window
 		Endif
 
 		If obj.Contains( "helpTreeSize" )
-			_helpView.SetViewSize( _helpView.HelpTree,obj["helpTreeSize"].ToNumber() )
+'			_helpView.SetViewSize( _helpView.HelpTree,obj["helpTreeSize"].ToNumber() )
 		Endif
 		
 		If obj.Contains( "lockedDocument" )
@@ -1542,7 +1641,7 @@ Class MainWindowInstance Extends Window
 		obj["codeField"] = New JsonBool( _codeView.FieldState )
 		obj["codeProperty"] = New JsonBool( _codeView.PropertyState )
 		
-		obj["helpTreeSize"] = New JsonNumber( _helpView.GetViewSize( _helpView.HelpTree ) )
+'		obj["helpTreeSize"] = New JsonNumber( _helpView.GetViewSize( _helpView.HelpTree ) )
 		
 		If _lockedDoc obj["lockedDocument"]=New JsonString( _lockedDoc.Path )
 		
@@ -1597,9 +1696,9 @@ Class MainWindowInstance Extends Window
 
 	
 	Method DeleteTmps()
-		For Local i:=1 Until 10
-			Local path:=RealPath( _tmp+"untitled"+i+".monkey2" )
-			If GetFileType( path )=FileType.File 
+		For Local i := 1 Until 10
+			Local path := RealPath( _tmp+"untitled"+i+".monkey2" )
+			If GetFileType( path ) = FileType.File 
 				If Not FindDocument( path ) DeleteFile( path )
 			Endif
 		Next
@@ -1608,8 +1707,8 @@ Class MainWindowInstance Extends Window
 
 	
 	Method AllocTmpPath:String()
-		For Local i:=1 Until 10
-			Local path:=_tmp+"untitled"+i+".monkey2"
+		For Local i := 1 Until 10
+			Local path := _tmp+"untitled"+i+".monkey2"
 			If GetFileType( path )=FileType.None Return path
 		Next
 		Return ""
@@ -1631,18 +1730,18 @@ Class MainWindowInstance Extends Window
 
 	
 	Method LockDoc( doc:Ted2Document )
-		If _lockedDoc And _lockedDoc=doc
-			_lockedDoc=Null
+		If _lockedDoc And _lockedDoc = doc then
+			_lockedDoc = Null
 			UpdateTabLabel( doc )
 			Return
 		Endif
 
-		If doc And Not Cast<TextView>( doc.View ) doc=Null
+		If doc And Not Cast<TextView>( doc.View ) then doc = Null
 	
-		Local old:=_lockedDoc
-		_lockedDoc=doc
+		Local old := _lockedDoc
+		_lockedDoc = doc
 		
-		If _lockedDoc=old Return
+		If _lockedDoc = old then Return
 		
 		UpdateTabLabel( old )
 		UpdateTabLabel( _lockedDoc )
@@ -1767,7 +1866,7 @@ Class MainWindowInstance Extends Window
 	Method DocumentTabLabel:String( doc:Ted2Document )
 		Local label := StripDir( doc.Path )
 		Local ext := ExtractExt( doc.Path ).ToLower()
-		If ext = ".monkey2" then label = StripExt( label )
+		If ext = ".monkey2" or ext = ".mx2" then label = StripExt( label )
 		If IsTmpPath( doc.Path ) Then label = "<"+label+">"
 		If doc = _lockedDoc Then label = "+"+label
 		If doc.Dirty Then label += "*"
@@ -1805,6 +1904,8 @@ Class MainWindowInstance Extends Window
 				icon = NODEKIND_AUDIO
 			Case ".png", ".jpg", "bmp"
 				icon = NODEKIND_IMAGE
+			Case ".ttf"
+				icon = NODEKIND_FONT
 			Case ".monkey2", ".mx2"
 				icon = NODEKIND_MONKEY2
 		End Select
@@ -1817,59 +1918,7 @@ Class MainWindowInstance Extends Window
 	Method DocumentTabIcon:int( doc:Ted2Document )
 		Local label := StripDir( doc.Path )
 		return GetIconFromExt( ExtractExt( doc.Path ) )
-#rem		
-		Local ext := ExtractExt( doc.Path ).ToLower()
-		
-		Local icon:Int = 0
-		Select ext
-			Case ".txt", ".md"
-				icon = NODEKIND_TEXT
-			Case ".cpp", "cxx", ".c"
-				icon = NODEKIND_CPP
-			Case ".h", ".hpp", ".hxx"
-				icon = NODEKIND_H
-			Case ".m", ".mm"
-				icon = NODEKIND_M
-			Case ".htm", ".html"
-				icon = NODEKIND_HTML
-			Case ".bat", ".sh"
-				icon = NODEKIND_SCRIPT
-			Case ".js"
-				icon = NODEKIND_JAVASCRIPT
-			Case ".css", ".json", ".xml"
-				icon = NODEKIND_WEBSCRIPT
-			Case ".ttf"
-				icon = NODEKIND_FONT
-			Case ".app", ".exe"
-				icon = NODEKIND_APP
-			Case ".wav", ".wave"
-				icon = NODEKIND_AUDIO
-			Case ".png", ".jpg", "bmp"
-				icon = NODEKIND_IMAGE
-			Case ".monkey2", ".mx2"
-				icon = NODEKIND_MONKEY2
-		End Select
-'rem		
-	Select ext
-      Case ".monkey2"
-        icon = NODEKIND_MONKEY2
-      Case ".png", ".jpg", ".bmp"', ".gif"
-        icon = NODEKIND_IMAGE
-      Case ".h", ".hpp", ".hxx"
-      Case ".c", ".cpp", ".cxx"
-      case ".m", ".mm"
-      case ".s", ".asm"
-      Case ".html", ".md", ".json", ".xml"
-      Case ".css"
-      case ".js"
-      Case ".sh", ".bat"
-      Case ".glsl"
-      Case ".txt"
-      Default
-    End Select
-#end    
-'		Return icon
-  End
+	End
   
   
   
@@ -1885,14 +1934,14 @@ Class MainWindowInstance Extends Window
 	Method OpenDocument:Ted2Document( path:String, addRecent:Bool = False, makeCurrent:Bool = True )
 		Local doc:Ted2Document
 
-		If path
+		If path then
 			path = RealPath( path )
 			
 			Local ext := ExtractExt( path ).ToLower()
 			
-      '_statusbar.SetText( )
+			'_statusbar.SetText( )
 			Select ext
-				Case ".monkey2"
+				Case ".monkey2", ".mx2"
 				Case ".png", ".jpg", ".bmp"', ".gif"
 				Case ".h", ".hpp", ".hxx", ".c", ".cpp", ".cxx", ".m", ".mm", ".s", ".asm"
 				Case ".html", ".md", ".json", ".xml"
@@ -1900,11 +1949,12 @@ Class MainWindowInstance Extends Window
 				Case ".sh", ".bat"
 				Case ".glsl"
 				Case ".txt"
+				Case ".ttf"
 				Default
       
 					_statusbar.SetError( "This item does not support previewing" )
           
-          'Notify( "Unrecognized file type extension for file '"+path+"'" )
+					'Notify( "Unrecognized file type extension for file '"+path+"'" )
 					Return Null
 			End
 		
@@ -1912,6 +1962,7 @@ Class MainWindowInstance Extends Window
 			If doc Then
 				_statusbar.SetText( "" )
 				If makeCurrent Then MakeCurrent( doc )
+				_statusbar.SetText( "" )
 				Return doc
 			Endif
 			
@@ -1920,10 +1971,13 @@ Class MainWindowInstance Extends Window
 					doc = New Mx2Document( path )
 				Case ".png",".jpg"
 					doc = New ImgDocument( path )
+				Case ".ttf"
+					doc = New FontDocument( path )
 				Default
 					doc = New TxtDocument( path )
 			End
-			
+			_statusbar.SetText( "" )
+
 		Else
 		
 
@@ -1981,7 +2035,7 @@ Class MainWindowInstance Extends Window
 	Method SaveDocument:Bool( doc:Ted2Document )
 		If IsTmpPath( doc.Path )
 
-			Local path:=RequestFile( "Save As","",True )
+			Local path := RequestFile( "Save As","",True )
 
 			If Not path Return False
 			
@@ -2080,9 +2134,10 @@ Class MainWindowInstance Extends Window
 '		dialog.Open()
 
 		_errors.Clear()
+		Local gotError:string =  ""
 		Local count:Int = 0
 		
-		
+'		Print "a1"
 		Repeat
 			Local stdout:=_console.ReadStdout()
 			If Not stdout Exit
@@ -2109,6 +2164,8 @@ Class MainWindowInstance Extends Window
 							doc.Errors.Add( err )
 							If _errors.Empty GotoError( err )
 							_errors.Add( err )
+							gotError =  "Error at Line " + ( line + 1 ) + ".  "+err.msg
+'							Print "ERROR "+gotError 
 						Endif
 						
 					Endif
@@ -2119,12 +2176,17 @@ Class MainWindowInstance Extends Window
 		
 		Forever
 		
+'		Print "a2"
 '		dialog.Close()
 		_statusbar.SetNormal()
 		
-		If Not appFile Return
+		If Not appFile Then
+			_statusbar.SetError( gotError )
+			Return
+		End if
 		
-		cmd=appFile
+'		Print "a3"
+		cmd = appFile
 		
 		If Not _console.Start( cmd )
 			Notify( "2 Failed to start process: '"+cmd+"'" )
@@ -2176,11 +2238,167 @@ Class MainWindowInstance Extends Window
 		
 		_console.Write( "Done.~n" )
 
+		If gotError <> "" Then
+			print gotError
+		End If
 		_statusbar.SetNormal()
 	End
 
 
 	
+	Method BuildCheck( config:String )
+		If _console.Running then Return
+		
+		Local buildDoc := Cast<Mx2Document>( BuildDoc() )
+		If Not buildDoc then Return
+		
+		For Local doc := Eachin _openDocs
+			Local mx2Doc := Cast<Mx2Document>( doc )
+			If mx2Doc then mx2Doc.Errors.Clear()
+		Next
+		
+		For Local doc := Eachin _openDocs
+			If doc.Save() then Continue
+			WriteError( doc.Path )
+			Return
+		Next
+
+		_console.Clear()
+		
+		Local cmd := _mx2cc+" checkapp -apptype=gui -build -config="+config+" ~q"+buildDoc.Path+"~q"
+		
+		If Not _console.Start( cmd ) then
+			'print buildDoc.Path
+			
+			Notify( "1 Failed to start process: '"+cmd+"'" )
+			Return
+		Endif
+		
+		Local appFile:String
+		
+'		Local dialog := New TextDialog( "Ted2","Building "+buildDoc.Path+"..." )
+		
+'		dialog.AddAction( "Cancel" ).Triggered=_console.Terminate
+		
+'		dialog.Open()
+
+		_errors.Clear()
+		Local gotError:string =  ""
+		Local count:Int = 0
+		
+		
+		Repeat
+			Local stdout:=_console.ReadStdout()
+			If Not stdout Exit
+			
+			'print "build "+stdout
+			_statusbar.SetBuilding(count, stdout)
+			count = count + 1
+			
+			If stdout.StartsWith( "Application check:" )
+				appFile=stdout.Slice( stdout.Find( ":" )+1 ).Trim()
+			Else
+				Local i:=stdout.Find( "] : Error : " )
+				If i<>-1
+					Local j:=stdout.Find( " [" )
+					If j<>-1
+						Local path:=stdout.Slice( 0,j )
+						Local line:=Int( stdout.Slice( j+2,i ) )-1
+						Local msg:=stdout.Slice( i+12 )
+						
+						Local err:=New Mx2Error( path,line,msg )
+						Local doc:=Cast<Mx2Document>( OpenDocument( path,False,False ) )
+						
+						If doc
+							doc.Errors.Add( err )
+							If _errors.Empty GotoError( err )
+							_errors.Add( err )
+							gotError =  "Error at Line " + ( line + 1 ) + ".  "+err.msg
+						Endif
+						
+					Endif
+				Endif
+			Endif
+			
+			_console.Write( stdout )
+		
+		Forever
+		
+'		dialog.Close()
+		_statusbar.SetNormal()
+		
+		If Not appFile Then
+			if gotError <> "" then
+				_statusbar.SetError( gotError )
+			Else
+				_console.Write( "Done.~n" )
+
+				_statusbar.SetNormal()
+			end if
+			Return
+		End if
+
+#rem		
+		cmd=appFile
+		
+		If Not _console.Start( cmd )
+			Notify( "2 Failed to start process: '"+cmd+"'" )
+			Return
+		Endif
+		
+		_console.Clear()
+		
+		Local tab := _browser.CurrentView
+			
+		If config = "debug"
+			_statusbar.SetDebug()
+      
+			_console.Write( "Debugging app:"+appFile+"~n" )
+			_browser.CurrentView = _debugView
+			_debugView.DebugBegin()
+		Else
+			_statusbar.SetRunning()
+			_console.Write( "Running app:"+appFile+"~n" )
+		Endif
+		
+		Repeat
+			
+			Local stdout := _console.ReadStdout()
+			If Not stdout Exit
+			
+			If config = "debug" And stdout="{{!DEBUG!}}~n"
+        '_statusbar.EndDebug()
+
+				_debugView.DebugStop()
+				Continue
+			End
+			
+			_console.Write( stdout )
+		
+		Forever
+		
+		If config = "debug"
+			_debugView.DebugEnd()
+			_statusbar.EndDebug()
+		Endif
+		
+		For Local doc := Eachin _openDocs
+			Local mx2Doc := Cast<Mx2Document>( doc )
+			If mx2Doc Then
+				mx2Doc.DebugLine=-1
+			End If
+		Next
+		
+		_browser.CurrentView=tab
+		
+		_console.Write( "Done.~n" )
+
+		_statusbar.SetNormal()
+#end		
+	End
+
+
+
 	Method RunScript( script:String )
 		If _console.Running then Return
 		

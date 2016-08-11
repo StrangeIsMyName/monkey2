@@ -76,6 +76,7 @@ Class ProjectView Extends ScrollView
 		End
 		
 		browser.RootNode.Label = StripDir( dir )+" ("+dir+")"
+		browser.RootNode.Expanded = true
 		
 		_docker.AddView( browser, "top" )
 		

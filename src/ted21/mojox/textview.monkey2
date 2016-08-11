@@ -375,7 +375,7 @@ Class TextDocument
 '					print "A   line="+line+" "+g_CodeText+" kind="+g_CodeKind+" index="+Code.IndexCount
 
 					jumpline = Code.IndexCount'line
-					Code.AddNode( g_CodeText, g_CodeKind, line, GetLineTabs(line) )
+					Code.AddInitialNode( g_CodeText, g_CodeKind, line, GetLineTabs(line) )
 					_lines.Data[line].icon = g_CodeIcon
 				Endif
 
@@ -396,7 +396,7 @@ Class TextDocument
 				if g_CodeKind > -1 Then
 					'print "2>"+GetLineTabs(line)
 					
-'					print "B   line="+line+" "+g_CodeText+" kind="+g_CodeKind+" index="+Code.IndexCount
+					'print "B   line="+line+" "+g_CodeText+" kind="+g_CodeKind+" index="+Code.IndexCount
 
 					jumpline = Code.IndexCount'line
 					Code.AddNode( g_CodeText, g_CodeKind, line, GetLineTabs(line) )
@@ -912,6 +912,44 @@ Class TextView Extends View
 	
 
 
+	Method Back()
+		If _cursorLocation > 0 Then
+			_cursorLocation -= 1
+			_cursor =  _cursorPosition[ _cursorLocation ]
+			_anchor = _cursor
+			UpdateCursor()
+		End If
+	End Method
+	
+	
+	Method Forward()
+		If _cursorLocation < 20 Then
+			_cursorLocation += 1
+			_cursor =  _cursorPosition[ _cursorLocation ]
+			_anchor = _cursor
+			UpdateCursor()
+		End If
+	End Method
+	
+	
+	Method UpdateCursorPosition()
+		If _cursorPositionCount < 20 Then
+			if _cursorPosition[ _cursorPositionCount ] <> _cursor then
+				_cursorPositionCount += 1
+				_cursorPosition[ _cursorPositionCount ] = _cursor
+				_cursorLocation = _cursorPositionCount
+			end if
+		Else
+			Local k:int
+			For k = 0 To 19
+				_cursorPosition[ k ] = _cursorPosition[ k + 1 ]
+			Next	
+			_cursorLocation = 20
+		End If
+	End Method
+	
+	
+	
 	Method Undo()
 		If _readOnly Return
 	
@@ -993,7 +1031,7 @@ Class TextView Extends View
 
 	
 	
- 	Method ExpandGutterSelect( p:Vec2i )
+	Method ExpandGutterSelect( p:Vec2i )
  		If p.y < 0 then Return
 		
 		Local line := p.y / _charh
@@ -1386,6 +1424,11 @@ Private
 	Field _showInvisibles:Bool = True
 	
 	Field _textColors:Color[]
+
+	'Local ta:=New String[2,2]
+	Field _cursorPosition := New int[21]
+	Field _cursorPositionCount:int = 0
+	Field _cursorLocation:int = -1
 
 	Field _anchor:Int
 	Field _cursor:Int
@@ -2058,6 +2101,8 @@ Protected
 	Method OnMouseEvent( event:MouseEvent ) Override
 		Select event.Type
 			Case EventType.MouseDown
+				UpdateCursorPosition()
+
 				App.KeyView = Self
 				_cursor = PointToIndex( event.Location )
 				_anchor = _cursor
@@ -2077,6 +2122,8 @@ Protected
 				end If
 				
 				_doc.CursorPos = _cursor
+				
+				UpdateCursorPosition()
         
 			Case EventType.MouseUp
 				_dragging = False

@@ -65,6 +65,37 @@ Class CodeTreeView Extends View
 
 
 
+		Method New( label:String, kind:Int, parent:Node, index:Int, line:int, indent:int, hidden:bool )
+			If Not(parent) Then
+				index = -1
+				If kind = NODEKIND_FOLDER then
+					kind = NODEKIND_APP
+			  End if
+			End If
+       
+			If parent Then
+				parent.AddChild( Self, index )
+			end if
+			
+			_label = label
+			_kind = kind
+			_line = line
+			_indent = indent * 16
+			_hidden = hidden
+			
+'			print label+" "+hidden
+			
+'			if kind = NODEKIND_FIELD then
+'				Hidden = true
+'			end if
+			
+			If index > -1 Then
+				Index = index
+			End if
+		End
+
+
+
 		Property Label:String()
 			Return _label
 		Setter( label:String )
@@ -75,9 +106,9 @@ Class CodeTreeView Extends View
 
 
 
-		Property Kind:String()
+		Property Kind:int()
 			Return _kind
-		Setter( kind:String )
+		Setter( kind:int )
 			_kind = kind
 			
 			Dirty()
@@ -85,9 +116,9 @@ Class CodeTreeView Extends View
 
 
 
-		Property Line:String()
+		Property Line:int()
 			Return _line
-		Setter( line:String )
+		Setter( line:int )
 			_line = line
 			
 			Dirty()
@@ -95,9 +126,9 @@ Class CodeTreeView Extends View
 
 
 
-		Property Index:String()
+		Property Index:int()
 			Return _index
-		Setter( index:String )
+		Setter( index:int )
 			_index = index
 			
 			Dirty()
@@ -200,8 +231,19 @@ Class CodeTreeView Extends View
 
 
 
-		Method RemoveChildren( index1:Int, index2:Int )
-			Assert( index1 >= 0 And index2 >= index1 And index1 <= _children.Length And index2 <= _children.Length )
+		Method NodeRemoveChildren( first:Int )
+'			print "noderemovechildren first="+first+" _children.length="+_children.Length
+			NodeRemoveChildren( first, _children.Length )
+		End
+
+
+
+		Method NodeRemoveChildren( index1:Int, index2:Int )
+'			print "noderemovechildren index1="+index1+" index2="+index2+" _children.length="+_children.Length
+			Assert( index1 >= 0 And index2 >= index1 )
+			
+			If index1 >= _children.Length then return'or index2 <= _children.Length Then return
+'			print "REMOVE"
 		
 			For Local i := index1 Until index2
 				_children[i]._parent = Null
@@ -232,14 +274,8 @@ Class CodeTreeView Extends View
 
 
 		
-		Method RemoveChildren( first:Int )
-			RemoveChildren( first, _children.Length )
-		End
-
-
-
 		Method RemoveAllChildren()
-			RemoveChildren( 0, _children.Length )
+			NodeRemoveChildren( 0, _children.Length )
 		End
 
 
@@ -296,24 +332,98 @@ Class CodeTreeView Extends View
 	End
 	
 	
-	
+#rem	
 	Method AddNodeToEnd( label:String, kind:Int, line:Int, indent:int )
-		new Node( label, kind, _rootNode, _indexCount, line, indent )
-	end method
-	
-	
-	
-	Method AddNode( label:String, kind:Int, line:Int, indent:int )
-'    print _indexCount
-    
 		local tmp:Node = new Node( label, kind, _rootNode, _indexCount, line, indent )
-'    tmp.Label = "bum"
-		'if kind = NODEKIND_FIELD then tmp.Hidden = true
+
+		select kind
+			case NODEKIND_METHOD
+				tmp.Hidden = _nkMethod
+			case NODEKIND_FUNCTION
+				tmp.Hidden = _nkFunction
+			case NODEKIND_FIELD
+				tmp.Hidden = _nkField
+			case NODEKIND_PROPERTY
+				tmp.Hidden = _nkProperty
+			case NODEKIND_LAMBDA
+				tmp.Hidden = _nkLambda
+		end select
+	end method
+#end	
+	
+	
+	Method AddInitialNode( label:String, kind:Int, line:Int, indent:int )
+		local hidden:bool = true
+		select kind
+			case NODEKIND_METHOD
+				hidden = _nkMethod
+			case NODEKIND_FUNCTION
+				hidden = _nkFunction
+			case NODEKIND_FIELD
+				hidden = _nkField
+			case NODEKIND_PROPERTY
+				hidden = _nkProperty
+			case NODEKIND_LAMBDA
+				hidden = _nkLambda
+		end select
+		
+		
+		new Node( label, kind, _rootNode, _indexCount, line, indent, not hidden )
 
 		if _indexCount = 0 then
 			_rootNode.Label = "<code>"
 			_rootNode.Kind = NODEKIND_APP			
 			_rootNode._expanded = true
+			_rootNode.Index = -1
+		end if
+
+		_indexCount += 1
+	end method
+
+
+
+	Method AddNode( label:String, kind:Int, line:Int, indent:int )
+		local hidden:bool = true
+		select kind
+			case NODEKIND_METHOD
+				hidden = _nkMethod
+			case NODEKIND_FUNCTION
+				hidden = _nkFunction
+			case NODEKIND_FIELD
+				hidden = _nkField
+			case NODEKIND_PROPERTY
+				hidden = _nkProperty
+			case NODEKIND_LAMBDA
+				hidden = _nkLambda
+		end select
+		
+'		print "kind="+kind+" hidden="+hidden+"   "+_nkMethod+" "+_nkFunction+" "+_nkField+" "+_nkProperty+" "+_nkLambda
+		
+		new Node( label, kind, _rootNode, _indexCount, line, indent, not hidden )
+'    tmp.Label = "bum"
+		'if kind = NODEKIND_FIELD then tmp.Hidden = true
+		
+'		print _nkMethod+" "+_nkFunction+" "+_nkField+" "+_nkProperty+" "+_nkLambda
+		
+'		select kind
+'			case NODEKIND_METHOD
+'				tmp.Hidden = _nkMethod
+'			case NODEKIND_FUNCTION
+'				tmp.Hidden = _nkFunction
+'			case NODEKIND_FIELD
+'				tmp.Hidden = _nkField
+'			case NODEKIND_PROPERTY
+'				tmp.Hidden = _nkProperty
+'			case NODEKIND_LAMBDA
+'				tmp.Hidden = _nkLambda
+'		end select
+
+
+		if _indexCount = 0 then
+			_rootNode.Label = "<code>"
+			_rootNode.Kind = NODEKIND_APP			
+			_rootNode._expanded = true
+			_rootNode.Index = -1
 		end if
 
 		_indexCount += 1
@@ -333,11 +443,14 @@ Class CodeTreeView Extends View
 		
 		_removeNode = null
 		RemoveLine( null, _rootNode, line)
+		
 		if _removeNode <> null Then
 			_indexCount = _removeNode.Index
+			
 '			print " REMOVE FROM "+_removeNode.Line+" index="+ _removeNode.Index
-			_rootNode.RemoveChildren( _removeNode.Index )
+			_rootNode.NodeRemoveChildren( _removeNode.Index )
 		end if
+
 
 '		print "  SHOW"
 '		ShowLine( _rootNode)
@@ -365,7 +478,7 @@ Class CodeTreeView Extends View
 
 
 	method ShowLine( node:Node )
-		print node.Label+" "+node.Line
+		print node.Index+"  "+node.Line+"   "+node.Label
 		
 		For Local child := Eachin node._children
 			ShowLine( child )
@@ -373,8 +486,21 @@ Class CodeTreeView Extends View
 	end method
 
 
-
+		
 	method ModifyKind( node:Node, kind:int, show:bool )
+		select kind
+			case NODEKIND_METHOD
+				_nkMethod = show
+			case NODEKIND_FUNCTION
+				_nkFunction = show
+			case NODEKIND_FIELD
+				_nkField = show
+			case NODEKIND_PROPERTY
+				_nkProperty = show
+			case NODEKIND_LAMBDA
+				_nkLambda = show
+		end select
+			
 		if not node then node = RootNode
 
 '		print "Modify Kind="+kind
@@ -490,6 +616,11 @@ Class CodeTreeView Extends View
 	Field _icons:Image
 	Field _nodeSize:Int
 
+	field _nkMethod:bool
+	field _nkFunction:bool
+	field _nkField:bool
+	field _nkProperty:bool
+	field _nkLambda:bool
 
 		
 	Method FindNodeAtPoint:Node( node:Node, point:Vec2i )
@@ -613,9 +744,10 @@ Class CodeTreeView Extends View
 			
 '			canvas.Color = Style.DefaultColor
 '			canvas.DrawText( node._index, node._rect.X+_nodeSize+25, node._rect.Y )
-'			canvas.DrawText( node._label, node._rect.X+_nodeSize+50, node._rect.Y )
+'			canvas.DrawText( node._label, node._rect.X+_nodeSize+70, node._rect.Y )
 
 			canvas.DrawText( node._label, node._rect.X + _nodeSize + 25 + xt, node._rect.Y )
+
 '			if node._hidden then canvas.DrawText( "H", node._rect.X + _nodeSize + 16 + xt, node._rect.Y )
 
 '			canvas.DrawText( node._label+"  "+node._line, node._rect.X + _nodeSize + 25, node._rect.Y )

@@ -4,7 +4,12 @@
 #Import "mainwindow"
 #Import "projectview"
 #Import "debugview"
+
 #Import "helpview"
+#Import "helpIndexView"
+#Import "helpModuleView"
+#Import "helpWindowView"
+
 #Import "colorview"
 #Import "codeview"
 
@@ -16,6 +21,7 @@
 #Import "mx2document"
 #Import "mx2highlighter"
 #Import "imgdocument"
+#Import "fontdocument"
 
 Namespace ted2
 

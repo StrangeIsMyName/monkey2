@@ -22,7 +22,6 @@ Class CodeView Extends DockingView
 	End
 
 
-
 	Property LambdaState:Bool()
 		Return _lambdaButton.Selected
 	Setter( lambdaButton:bool )
