@@ -47,7 +47,7 @@ Class AudioDocumentView Extends View
 		
 		If Not _chan _chan = New Channel
 		
-		_timer = New Timer(10, OnUpdate)
+		if not _timer Then _timer = New Timer(10, OnUpdate)
 	End
 
 
@@ -774,6 +774,8 @@ Protected
 		
 		_sound = Null
 		_data = Null
+
+		_view._timer.Cancel()
 	End
 
 
