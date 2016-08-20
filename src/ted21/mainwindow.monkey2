@@ -1,5 +1,5 @@
 
-Namespace ted2
+Namespace ted21
 
 #Import "assets/about.html@/ted2"
 #Import "assets/scripts.json@/ted2"
@@ -74,7 +74,9 @@ Class MainWindowInstance Extends Window
 	Field _findUseBigCursor:Action
 	Field _findShowInvisibles:Action
 	Field _showInvisibles:bool = true
-	Field _showBigCursor:bool = true
+	Field _showBigCursor:bool = True
+	
+	Field _ShowFindWindow:bool = false
 	
 	Field _escape:Action
 	Field _cmdEscape:Action
@@ -89,6 +91,16 @@ Class MainWindowInstance Extends Window
 	
 	'menus
 	Field _menuBar:MenuBar
+
+	Field _menuButtonSave:Buttonx
+
+	Field _menuButtonBack:Buttonx
+	Field _menuButtonForward:Buttonx
+
+	Field _menuButtonCheck:Buttonx
+	Field _menuButtonRelease:Buttonx
+	Field _menuButtonDebug:Buttonx
+	Field _menuButtonStop:Buttonx
 	
 	Field _newFiles:Menu
 	Field _recentFiles:Menu
@@ -171,19 +183,27 @@ Class MainWindowInstance Extends Window
 	End
 
 
-
 	Method OnFileClose()
+	
 		If Not _currentDoc Return
 		
 		If _currentDoc.Dirty
 		
-			Local buttons:=New String[]( "Save","Discard Changes","Cancel" )
+			Local pth:string = _currentDoc.Path.ToLower()
+			Print "path="+pth
+			If pth.Contains( "untitled" ) Then
+				Print "ignoring"
+				CloseDocument( _currentDoc )
+				return
+			end if
+			
+			Local buttons := New String[]( "Save","Discard Changes","Cancel" )
 		
 			Select TextDialog.Run( "Close","File '"+_currentDoc.Path+"' has been modified.",buttons )
-			Case 0
-				If Not SaveDocument( _currentDoc ) Return
-			Case 2
-				Return
+				Case 0
+					If Not SaveDocument( _currentDoc ) Return
+				Case 2
+					Return
 			End
 
 		Endif
@@ -193,6 +213,44 @@ Class MainWindowInstance Extends Window
 		SaveState()
 	End
 
+#rem
+	Method OnFileClose()
+		If Not _currentDoc Return
+		
+		If _currentDoc.Dirty
+		
+'			Print "dirty document " + _currentDoc.Path
+			Local pth:string = _currentDoc.Path.ToLower()
+			If pth.Contains( "untitled" ) Then
+				Print "PATH NEEDED"
+				Local path := RequestFile( "Save As", "", True )
+				Print ">"+path+"<"
+				If Not path Return
+				Print "rename"
+				
+				RenameDocument( _currentDoc,path )
+				SaveDocument( _currentDoc )
+			Else
+
+				Local buttons := New String[]( "Save", "Discard Changes", "Cancel" )
+			
+				Print "start dialog"
+				Select TextDialog.Run( "Close", "File '" + _currentDoc.Path + "' has been modified.", buttons )
+					Case 0
+						If Not SaveDocument( _currentDoc ) then Return
+					Case 2
+						Return
+				End
+			End if
+		
+
+		Endif
+		
+		CloseDocument( _currentDoc )
+		
+		SaveState()
+	End
+#end
 
 	
 	Method OnFileCloseAll()
@@ -239,11 +297,12 @@ Class MainWindowInstance Extends Window
 	Method OnFileSaveAs()
 		If Not _currentDoc Return
 			
-		Local path:=RequestFile( "Save As","",True )
+		Local path := RequestFile( "Save As","",True )
 		If Not path Return
 		
 		RenameDocument( _currentDoc,path )
 		SaveDocument( _currentDoc )
+		
 	End
 
 
@@ -388,7 +447,7 @@ Class MainWindowInstance Extends Window
 
 	
 	Method OnEditSelectAll()
-		Local textView:=Cast<TextView>( App.KeyView )
+		Local textView := Cast<TextView>( App.KeyView )
 		
 		If textView textView.SelectAll()
 	End
@@ -396,6 +455,7 @@ Class MainWindowInstance Extends Window
 
 	
 	Method OnEditFind()
+		If _findDialog.Visible Then return
 		_findDialog.Open()
 	End
 
@@ -582,7 +642,7 @@ Class MainWindowInstance Extends Window
 	Method OnFindNext()
 		If Not _currentTextView Return
 		
-		Local text:=_findDialog.FindText
+		Local text := _findDialog.FindText
 		If Not text Return
 		
 		Local tvtext:=_currentTextView.Text
@@ -607,7 +667,7 @@ Class MainWindowInstance Extends Window
 	Method OnFindPrevious()
 		If Not _currentTextView Return
 		
-		Local text:=_findDialog.FindText
+		Local text := _findDialog.FindText
 		If Not text Return
 
 		Local tvtext:=_currentTextView.Text
@@ -828,7 +888,7 @@ Class MainWindowInstance Extends Window
 		_fileSave.Triggered=OnFileSave
 		
 		_fileSaveAs=New Action( "Save As" )
-		_fileSaveAs.Triggered=OnFileSaveAs
+		_fileSaveAs.Triggered = OnFileSaveAs
 		
 		_fileSaveAll=New Action( "Save All" )
 		_fileSaveAll.Triggered=OnFileSaveAll
@@ -1141,9 +1201,9 @@ Class MainWindowInstance Extends Window
 
 
 			local _fieldButton:Buttonx
-		 _fieldButton = New Buttonx( "", 40, 40)
-		 _fieldButton.Live = false
-		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
+			 _fieldButton = New Buttonx( "", 40, 40)
+			 _fieldButton.Live = False
+			 _fieldButton.ImageButton = 10
 			_menuBar.AddView( _fieldButton,"left",30, false )
 
 		local _actionField:Action
@@ -1167,9 +1227,9 @@ Class MainWindowInstance Extends Window
 		_actionField.Triggered = Lambda()
 			OnFileSave()
 		end
-		_fieldButton = New Buttonx( _actionField, "", 40, 40)
-		_fieldButton.ImageButton = 5'NODEKIND_SAVE
-		_menuBar.AddView( _fieldButton,"left",40, false )
+		_menuButtonSave = New Buttonx( _actionField, "", 40, 40)
+		_menuButtonSave.ImageButton = 5'NODEKIND_SAVE
+		_menuBar.AddView( _menuButtonSave,"left",40, false )
 
 		_actionField = New Action( "method" )
 		_actionField.Triggered = Lambda()
@@ -1178,19 +1238,21 @@ Class MainWindowInstance Extends Window
 		_fieldButton = New Buttonx( _actionField, "", 40, 40)
 		_fieldButton.ImageButton = 6'NODEKIND_SAVEAS
 		_menuBar.AddView( _fieldButton,"left",40, false )
+		
 
 			_fieldButton = New Buttonx( "", 40, 40)
 			_fieldButton.Live = false
 			_fieldButton.ImageButton = 10'NODEKIND_VLINE
 			_menuBar.AddView( _fieldButton,"left",30, false )
 
-		_fieldButton = New Buttonx( _editBack, "", 40, 40)
-		_fieldButton.ImageButton = 19
-		_menuBar.AddView( _fieldButton,"left",40, false )
+		_menuButtonBack = New Buttonx( _editBack, "", 40, 40)
+		_menuButtonBack.ImageButton = 19
+		_menuBar.AddView( _menuButtonBack,"left",40, false )
 		
-		_fieldButton = New Buttonx( _editForward, "", 40, 40)
-		_fieldButton.ImageButton = 20
-		_menuBar.AddView( _fieldButton,"left",40, false )
+		_menuButtonForward = New Buttonx( _editForward, "", 40, 40)
+		_menuButtonForward.ImageButton = 20
+		_menuBar.AddView( _menuButtonForward,"left",40, false )
+
 
 			_fieldButton = New Buttonx( "", 40, 40)
 			_fieldButton.Live = false
@@ -1201,44 +1263,40 @@ Class MainWindowInstance Extends Window
 		_actionField.Triggered = Lambda()
 			OnBuildCheck()
 		End
-		_fieldButton = New Buttonx( _actionField, "", 40, 40)
-		_fieldButton.ImageButton = 21
-		_menuBar.AddView( _fieldButton,"left",40, false )
-
-'		 _fieldButton = New Buttonx( "", 40, 40)
-'		 _fieldButton.Live = false
-'		 _fieldButton.ImageButton = 10'NODEKIND_VLINE
-'			_menuBar.AddView( _fieldButton,"left",30, false )
+		_menuButtonCheck = New Buttonx( _actionField, "", 40, 40)
+		_menuButtonCheck.ImageButton = 21
+		_menuBar.AddView( _menuButtonCheck,"left",40, false )
 
 		_actionField = New Action( "run" )
 		_actionField.Triggered = Lambda()
 			OnBuildRelease()
 		end
-		_fieldButton = New Buttonx( _actionField, "", 40, 40)
-		_fieldButton.ImageButton = 8'NODEKIND_RUN
-		_menuBar.AddView( _fieldButton,"left",40, false )
+		_menuButtonRelease = New Buttonx( _actionField, "", 40, 40)
+		_menuButtonRelease.ImageButton = 8'NODEKIND_RUN
+		_menuBar.AddView( _menuButtonRelease,"left",40, false )
 
 		_actionField = New Action( "debug" )
 		_actionField.Triggered = Lambda()
 			OnBuildDebug()
 		end
-		_fieldButton = New Buttonx( _actionField, "", 40, 40)
-		_fieldButton.ImageButton = 9'NODEKIND_RUNDEBUG
-		_menuBar.AddView( _fieldButton,"left",40, false )
+		_menuButtonDebug = New Buttonx( _actionField, "", 40, 40)
+		_menuButtonDebug.ImageButton = 9'NODEKIND_RUNDEBUG
+		_menuBar.AddView( _menuButtonDebug,"left",40, false )
 
 		_actionField = New Action( "compile stop" )
 		_actionField.Triggered = Lambda()
 			OnBuildForceStop()
 		end
-		_fieldButton = New Buttonx( _actionField, "", 40, 40)
-		_fieldButton.ImageButton = 17'NODEKIND_SAVEAS
-		_menuBar.AddView( _fieldButton,"left",40, false )
+		_menuButtonStop = New Buttonx( _actionField, "", 40, 40)
+		_menuButtonStop.ImageButton = 17
+		_menuButtonStop.Enabled =  false
+		_menuBar.AddView( _menuButtonStop,"left",40, false )
+
 
 			_fieldButton = New Buttonx( "", 40, 40)
 			_fieldButton.Live = false
 			_fieldButton.ImageButton = 10
 			_menuBar.AddView( _fieldButton,"left",30, false )
-
 
 		local _findField := New TextField
 		_menuBar.AddView( _findField,"left",180, false )
@@ -1282,20 +1340,20 @@ Class MainWindowInstance Extends Window
 		_projectView = New ProjectView	
 		_codeView = new CodeView
 		_codeView.MethodClicked = Lambda( )
-			_currentTextView.Document.Code.ModifyKind( null, NODEKIND_METHOD, _codeView.MethodState )
-		end	
+			_currentTextView.Document.Code.ModifyKind( NODEKIND_METHOD, _codeView.MethodState )
+		End
 		_codeView.FunctionClicked = Lambda( )
-			_currentTextView.Document.Code.ModifyKind( null, NODEKIND_FUNCTION, _codeView.FunctionState )
-		end	
+			_currentTextView.Document.Code.ModifyKind( NODEKIND_FUNCTION, _codeView.FunctionState )
+		End
 		_codeView.FieldClicked = Lambda( )
-			_currentTextView.Document.Code.ModifyKind( null, NODEKIND_FIELD, _codeView.FieldState )
-		end	
+			_currentTextView.Document.Code.ModifyKind( NODEKIND_FIELD, _codeView.FieldState )
+		End
 		_codeView.PropertyClicked = Lambda( )
-			_currentTextView.Document.Code.ModifyKind( null, NODEKIND_PROPERTY, _codeView.PropertyState )
-		end	
+			_currentTextView.Document.Code.ModifyKind( NODEKIND_PROPERTY, _codeView.PropertyState )
+		End
 		_codeView.LambdaClicked = Lambda( )
-			_currentTextView.Document.Code.ModifyKind( null, NODEKIND_LAMBDA, _codeView.LambdaState )
-		end	
+			_currentTextView.Document.Code.ModifyKind( NODEKIND_LAMBDA, _codeView.LambdaState )
+		End
 
 
     
@@ -1319,42 +1377,11 @@ Class MainWindowInstance Extends Window
 		_browser.CurrentView = _projectView
 		_browser.CurrentChanged = Lambda()
 		'print "browser changed"
-#rem
-		select _browser.CurrentView
-			case _helpView
-				print "helpview"
-				_console.Visible = false
-				_docTabber.Visible = false
-				
-					
-			default
-				_docTabber.Visible = true
-
-				_currentTextView = Null
-				If _currentDoc then
-					_currentTextView = Cast<TextView>( _currentDoc.View )
-					
-					If _currentTextView Then
-						if _showConsole then _console.Visible = true
-					endif
-				end if
-'				if _browser.PreviousView = _helpView Then
-'				end if
-		end select
-#end		
-'			if _browser.CurrentView = _codeView Then
-				'print "CODE VIEW"
-				'_codeView._docker.ContentView
-'			end if
 		end 
 		
 		_colorView = New ColorView
 		_colorView.UseColor = Lambda()
-			Local textView := Cast<TextView>( App.KeyView )
-			
-			If not textView then Return
-        
-			textView.Insert( _colorView.RGB )
+			UseColor()
 		End
 		_colorView.CloseColor = Lambda()
 			_colorView.Visible = false
@@ -1381,17 +1408,43 @@ Class MainWindowInstance Extends Window
 		End
 
 		_statusbar = New StatusBar
-
+		_statusbar.LeftTextClicked = Lambda()
+			While Not _errors.Empty And _errors.First.removed
+				_errors.RemoveFirst()
+			Wend
+			
+			If _errors.Empty Return
+			
+			_errors.AddLast( _errors.RemoveFirst() )
+				
+			Local err:string = "Error at Line " + ( _errors.First.line + 1 ) + ".  "+_errors.First.msg
+			'Print err
+			_statusbar.SetError( _errors.First.line, err )
+			GotoError( _errors.First )
+		End
+		_statusbar.RightTextClicked = Lambda()
+'			Print "statusbar Right clicked"
 		
+			_currentTextView = Null
+			If _currentDoc then
+				_currentTextView = Cast<TextView>( _currentDoc.View )
+      
+				If _currentTextView Then
+'					Print "line="+_currentTextView.CursorRow
+					_currentTextView.GotoLine( _currentTextView.CursorRow )
+					
+				End If
+			End If
+		End
+
 		_docker = New DockingView
 		_docker.ContentView = _docTabber
 		_docker.AddView( _menuBar,"top",40, false )
 		_docker.AddView( _statusbar, "bottom", 30, false )
 		
-		_docker.AddView( _browser,"left",250 )
-		_docker.AddView( _console,"bottom",200 )
+		_docker.AddView( _browser,"left",280 )
 		_docker.AddView( _colorView,"right",200, false )
-
+		_docker.AddView( _console,"bottom",200 )
 
 	End
 
@@ -1405,7 +1458,7 @@ Class MainWindowInstance Extends Window
 		ClearColor = Theme.ClearColor
 		
 		SwapInterval = 1
-		
+
 		InitPaths()
 		InitActions()
 		InitMenus()
@@ -1453,16 +1506,53 @@ Class MainWindowInstance Extends Window
 
 
 
+	Method UseColor()
+		Local textView := Cast<TextView>( App.KeyView )
+		
+		If not textView Then Return
+
+		local xPos:int = textView.Document.CursorColumn
+		Local line:int = textView.Document.CursorLine-1
+		Local textLine:string = textView.Document.GetLine( line ).Left( xPos )
+		
+		Local pos:int =  textLine.Length
+		While pos > -1 and textLine.Mid(pos, 1)[0] < 33
+			pos -= 1
+		Wend
+		
+		textLine = textLine.Left( pos+1 ).ToLower()
+		'Print "color >"+textLine
+		
+		If textLine.Right( 1 ) =  "(" Then
+			'Print "rgb"
+			textView.Insert( _colorView.RGB )
+		Else
+			'Print "insert"
+			If _colorView.Text = "" Then
+				textView.Insert( "( " + _colorView.RGB + " )" )
+			Else
+				textView.Insert( _colorView.Text )
+			End if
+		End If
+'		Print xPos
+		
+'		Print ">" + textLine + "<"
+		'textView.Insert( _colorView.RGB )
+		'Print 
+	End method
+	
+	
+	
 	Method UpdateFileTimes()
 		For Local doc := Eachin _openDocs
 			If doc <> Null
 				Local path := doc.Path
-				print doc.Time+" "+GetFileTime( path )+"  "+path
+				'print doc.Time+" "+GetFileTime( path )+"  "+path
 				If doc.Time < GetFileTime( path ) Then
-'					doc.Load()
-'					doc.DirtyChanged = Lambda()
-'						UpdateTabLabel( doc )
-'					End
+					doc.Load()
+					doc.DirtyChanged = Lambda()
+						UpdateTabLabel( doc )
+					End
 					MakeCurrent( Cast<Ted2Document>( doc ) )
 '					SaveDocument( doc )
 				End
@@ -1507,7 +1597,7 @@ Class MainWindowInstance Extends Window
 	
 	
 	Method LoadState()
-		Local obj:=JsonObject.Load( "bin/ted2.state.json" )
+		Local obj:=JsonObject.Load( "bin/ted21.state.json" )
 		If Not obj Return
 		
 		If obj.Contains( "codeMethod" )
@@ -1675,7 +1765,7 @@ Class MainWindowInstance Extends Window
 		next
 		out = out + str + "~n"
    
-		SaveString( out,"bin/ted2.state.json" )
+		SaveString( out,"bin/ted21.state.json" )
 	End
 
 
@@ -1777,7 +1867,7 @@ Class MainWindowInstance Extends Window
 			_currentTextView = Cast<TextView>( doc.View )
       
 			If _currentTextView Then
-      'print "here"
+				'print "here"
 				_codeView.ContentView = _currentTextView.Document.Code
 				
 				_currentTextView.BlockCursor = _showBigCursor
@@ -1787,19 +1877,20 @@ Class MainWindowInstance Extends Window
 				_currentTextView.Document.SelectedIndex = _currentTextView.Document.CursorCodeLine
 
 				_currentTextView.Document.CursorMoved = Lambda()
+					_statusbar.ErrorOff()
 					_statusbar.SetCursor( _currentTextView.Document.CursorLine, _currentTextView.Document.CursorColumn, _currentTextView.Document.CursorChar )
-'					print _currentTextView.Document.CursorCodeLine
+					'print _currentTextView.Document.CursorCodeLine
 					
 					_currentTextView.Document.SelectedIndex = _currentTextView.Document.CursorCodeLine
 					
 '					print "line="+_currentTextView.Document.CursorLine+" column="+_currentTextView.Document.CursorColumn
 				end
 	
-				_currentTextView.Document.Code.ModifyKind( null, NODEKIND_METHOD, _codeView.MethodState )
-				_currentTextView.Document.Code.ModifyKind( null, NODEKIND_FUNCTION, _codeView.FunctionState )
-				_currentTextView.Document.Code.ModifyKind( null, NODEKIND_FIELD, _codeView.FieldState )
-				_currentTextView.Document.Code.ModifyKind( null, NODEKIND_PROPERTY, _codeView.PropertyState )
-				_currentTextView.Document.Code.ModifyKind( null, NODEKIND_LAMBDA, _codeView.LambdaState )
+				_currentTextView.Document.Code.ModifyKind( NODEKIND_METHOD, _codeView.MethodState )
+				_currentTextView.Document.Code.ModifyKind( NODEKIND_FUNCTION, _codeView.FunctionState )
+				_currentTextView.Document.Code.ModifyKind( NODEKIND_FIELD, _codeView.FieldState )
+				_currentTextView.Document.Code.ModifyKind( NODEKIND_PROPERTY, _codeView.PropertyState )
+				_currentTextView.Document.Code.ModifyKind( NODEKIND_LAMBDA, _codeView.LambdaState )
 				if _showConsole then _console.Visible = true
 			else	
 				_console.Visible = false
@@ -1900,7 +1991,7 @@ Class MainWindowInstance Extends Window
 				icon = NODEKIND_FONT
 			Case ".app", ".exe"
 				icon = NODEKIND_APP
-			Case ".wav", ".wave"
+			Case ".wav", ".ogg"
 				icon = NODEKIND_AUDIO
 			Case ".png", ".jpg", "bmp"
 				icon = NODEKIND_IMAGE
@@ -1947,12 +2038,13 @@ Class MainWindowInstance Extends Window
 				Case ".html", ".md", ".json", ".xml"
 				Case ".css", ".js"
 				Case ".sh", ".bat"
+				case ".wav", ".ogg"
 				Case ".glsl"
 				Case ".txt"
 				Case ".ttf"
 				Default
       
-					_statusbar.SetError( "This item does not support previewing" )
+					_statusbar.SetError( -1, "This item does not support previewing" )
           
 					'Notify( "Unrecognized file type extension for file '"+path+"'" )
 					Return Null
@@ -1971,6 +2063,8 @@ Class MainWindowInstance Extends Window
 					doc = New Mx2Document( path )
 				Case ".png",".jpg"
 					doc = New ImgDocument( path )
+				Case ".wav",".ogg"
+					doc = New AudioDocument( path )
 				Case ".ttf"
 					doc = New FontDocument( path )
 				Default
@@ -1983,13 +2077,13 @@ Class MainWindowInstance Extends Window
 
 			path = AllocTmpPath()
 			If Not path then
-				_statusbar.SetError( "Can't create temporary file" )
+				_statusbar.SetError( -1, "Can't create temporary file" )
 				'Notify( "Can't create temporary file" )
 				Return Null
 			Endif
 			SaveString( "", path )
 
-			_statusbar.SetError( "This item does not support previewing" )
+			_statusbar.SetError( -1, "This item does not support previewing" )
 			
 			doc = New Mx2Document( path )
 		
@@ -1997,7 +2091,7 @@ Class MainWindowInstance Extends Window
 		
 '		If Not doc.Load()
 		If GetFileType( path ) <> FileType.File Or Not doc.Load()
-			_statusbar.SetError( "Can't preview this document" )
+			_statusbar.SetError( -1, "Can't preview this document" )
 
 			ReadError( path )
 			Return Null
@@ -2083,13 +2177,13 @@ Class MainWindowInstance Extends Window
 
 	
 	Method GotoError( err:Mx2Error )
-		Local doc:=Cast<Mx2Document>( OpenDocument( err.path ) )
+		Local doc := Cast<Mx2Document>( OpenDocument( err.path ) )
 		If Not doc Return
 		
-		Local tv:=Cast<TextView>( doc.View )
+		Local tv := Cast<TextView>( doc.View )
 		If Not tv Return
 		
-		Local sol:=tv.Document.StartOfLine( err.line )
+		Local sol := tv.Document.StartOfLine( err.line )
 		tv.SelectText( sol,sol )
 		
 		Return
@@ -2097,6 +2191,22 @@ Class MainWindowInstance Extends Window
 	
 	
 	
+	Method StopOn()
+		_menuButtonCheck.Enabled = false
+		_menuButtonRelease.Enabled = False
+		_menuButtonDebug.Enabled = false
+		_menuButtonStop.Enabled = True
+	End method
+
+	Method StopOff()
+		_menuButtonCheck.Enabled = True
+		_menuButtonRelease.Enabled = True
+		_menuButtonDebug.Enabled = True
+		_menuButtonStop.Enabled = false
+	End method
+
+
+
 	Method Build( config:String )
 		If _console.Running then Return
 		
@@ -2127,6 +2237,8 @@ Class MainWindowInstance Extends Window
 		
 		Local appFile:String
 		
+		StopOn()
+		
 '		Local dialog := New TextDialog( "Ted2","Building "+buildDoc.Path+"..." )
 		
 '		dialog.AddAction( "Cancel" ).Triggered=_console.Terminate
@@ -2135,7 +2247,9 @@ Class MainWindowInstance Extends Window
 
 		_errors.Clear()
 		Local gotError:string =  ""
+		Local gotErrorLine:int =  -1
 		Local count:Int = 0
+		Local errStr:string = ""
 		
 '		Print "a1"
 		Repeat
@@ -2149,12 +2263,12 @@ Class MainWindowInstance Extends Window
 			If stdout.StartsWith( "Application built:" )
 				appFile=stdout.Slice( stdout.Find( ":" )+1 ).Trim()
 			Else
-				Local i:=stdout.Find( "] : Error : " )
-				If i<>-1
-					Local j:=stdout.Find( " [" )
-					If j<>-1
-						Local path:=stdout.Slice( 0,j )
-						Local line:=Int( stdout.Slice( j+2,i ) )-1
+				Local i := stdout.Find( "] : Error : " )
+				If i <> -1
+					Local j := stdout.Find( " [" )
+					If j <> -1
+						Local path := stdout.Slice( 0,j )
+						Local line := Int( stdout.Slice( j+2,i ) )-1
 						Local msg:=stdout.Slice( i+12 )
 						
 						Local err:=New Mx2Error( path,line,msg )
@@ -2164,7 +2278,10 @@ Class MainWindowInstance Extends Window
 							doc.Errors.Add( err )
 							If _errors.Empty GotoError( err )
 							_errors.Add( err )
-							gotError =  "Error at Line " + ( line + 1 ) + ".  "+err.msg
+							If gotErrorLine =  -1 Then
+								gotError =  "Error at Line " + ( line + 1 ) + ".  "+err.msg
+								gotErrorLine =  line
+							End If
 '							Print "ERROR "+gotError 
 						Endif
 						
@@ -2172,16 +2289,24 @@ Class MainWindowInstance Extends Window
 				Endif
 			Endif
 			
+			errStr = stdout
 			_console.Write( stdout )
 		
 		Forever
 		
 '		Print "a2"
 '		dialog.Close()
-		_statusbar.SetNormal()
+		If errStr.Left( 12 ) = "Build error:" Then
+			gotError = errStr
+			gotErrorLine = -1
+		Else
+			_statusbar.SetNormal()
+		End if
 		
+
 		If Not appFile Then
-			_statusbar.SetError( gotError )
+			_statusbar.SetError( gotErrorLine, gotError )
+			StopOff()
 			Return
 		End if
 		
@@ -2190,9 +2315,12 @@ Class MainWindowInstance Extends Window
 		
 		If Not _console.Start( cmd )
 			Notify( "2 Failed to start process: '"+cmd+"'" )
+			StopOff()
 			Return
 		Endif
 		
+		_menuButtonStop.Enabled = false
+
 		_console.Clear()
 		
 		Local tab := _browser.CurrentView
@@ -2209,7 +2337,6 @@ Class MainWindowInstance Extends Window
 		Endif
 		
 		Repeat
-			
 			Local stdout := _console.ReadStdout()
 			If Not stdout Exit
 			
@@ -2221,7 +2348,6 @@ Class MainWindowInstance Extends Window
 			End
 			
 			_console.Write( stdout )
-		
 		Forever
 		
 		If config = "debug"
@@ -2238,6 +2364,8 @@ Class MainWindowInstance Extends Window
 		
 		_console.Write( "Done.~n" )
 
+		StopOff()
+
 		If gotError <> "" Then
 			print gotError
 		End If
@@ -2250,7 +2378,10 @@ Class MainWindowInstance Extends Window
 		If _console.Running then Return
 		
 		Local buildDoc := Cast<Mx2Document>( BuildDoc() )
-		If Not buildDoc then Return
+		If Not buildDoc Then
+			'Print "here2"
+			Return
+		End If
 		
 		For Local doc := Eachin _openDocs
 			Local mx2Doc := Cast<Mx2Document>( doc )
@@ -2259,6 +2390,7 @@ Class MainWindowInstance Extends Window
 		
 		For Local doc := Eachin _openDocs
 			If doc.Save() then Continue
+			'Print "here1"
 			WriteError( doc.Path )
 			Return
 		Next
@@ -2270,11 +2402,12 @@ Class MainWindowInstance Extends Window
 		If Not _console.Start( cmd ) then
 			'print buildDoc.Path
 			
-			Notify( "1 Failed to start process: '"+cmd+"'" )
+			Notify( "Failed to start process: '"+cmd+"'" )
 			Return
 		Endif
 		
 		Local appFile:String
+		StopOn()
 		
 '		Local dialog := New TextDialog( "Ted2","Building "+buildDoc.Path+"..." )
 		
@@ -2283,12 +2416,14 @@ Class MainWindowInstance Extends Window
 '		dialog.Open()
 
 		_errors.Clear()
-		Local gotError:string =  ""
+		Local gotError:string = ""
+		Local gotErrorLine:int = -1
 		Local count:Int = 0
+		Local errStr:string = ""
 		
 		
 		Repeat
-			Local stdout:=_console.ReadStdout()
+			Local stdout := _console.ReadStdout()
 			If Not stdout Exit
 			
 			'print "build "+stdout
@@ -2296,40 +2431,51 @@ Class MainWindowInstance Extends Window
 			count = count + 1
 			
 			If stdout.StartsWith( "Application check:" )
-				appFile=stdout.Slice( stdout.Find( ":" )+1 ).Trim()
+				appFile = stdout.Slice( stdout.Find( ":" )+1 ).Trim()
 			Else
-				Local i:=stdout.Find( "] : Error : " )
-				If i<>-1
-					Local j:=stdout.Find( " [" )
-					If j<>-1
-						Local path:=stdout.Slice( 0,j )
-						Local line:=Int( stdout.Slice( j+2,i ) )-1
-						Local msg:=stdout.Slice( i+12 )
+				Local i := stdout.Find( "] : Error : " )
+				If i <> -1 Then
+					Local j := stdout.Find( " [" )
+					If j <> -1 Then
+						Local path := stdout.Slice( 0, j )
+						Local line := Int( stdout.Slice( j+2, i ) )-1
+						Local msg := stdout.Slice( i+12 )
 						
-						Local err:=New Mx2Error( path,line,msg )
-						Local doc:=Cast<Mx2Document>( OpenDocument( path,False,False ) )
+						Local err := New Mx2Error( path,line,msg )
+						Local doc := Cast<Mx2Document>( OpenDocument( path, False, False ) )
 						
 						If doc
 							doc.Errors.Add( err )
-							If _errors.Empty GotoError( err )
+							If _errors.Empty then GotoError( err )
 							_errors.Add( err )
-							gotError =  "Error at Line " + ( line + 1 ) + ".  "+err.msg
+							If gotErrorLine = -1 then
+								gotError =  "Error at Line " + ( line + 1 ) + ".  "+err.msg
+								gotErrorLine = line
+							End if
 						Endif
 						
 					Endif
 				Endif
 			Endif
 			
+			errStr = stdout
 			_console.Write( stdout )
 		
 		Forever
 		
 '		dialog.Close()
-		_statusbar.SetNormal()
+		If errStr.Left( 12 ) = "Build error:" Then
+			gotError = errStr
+			gotErrorLine = -1
+		Else
+			_statusbar.SetNormal()
+		End if
+
+		StopOff()
 		
 		If Not appFile Then
 			if gotError <> "" then
-				_statusbar.SetError( gotError )
+				_statusbar.SetError( gotErrorLine, gotError )
 			Else
 				_console.Write( "Done.~n" )
 
@@ -2337,64 +2483,6 @@ Class MainWindowInstance Extends Window
 			end if
 			Return
 		End if
-
-#rem		
-		cmd=appFile
-		
-		If Not _console.Start( cmd )
-			Notify( "2 Failed to start process: '"+cmd+"'" )
-			Return
-		Endif
-		
-		_console.Clear()
-		
-		Local tab := _browser.CurrentView
-			
-		If config = "debug"
-			_statusbar.SetDebug()
-      
-			_console.Write( "Debugging app:"+appFile+"~n" )
-			_browser.CurrentView = _debugView
-			_debugView.DebugBegin()
-		Else
-			_statusbar.SetRunning()
-			_console.Write( "Running app:"+appFile+"~n" )
-		Endif
-		
-		Repeat
-			
-			Local stdout := _console.ReadStdout()
-			If Not stdout Exit
-			
-			If config = "debug" And stdout="{{!DEBUG!}}~n"
-        '_statusbar.EndDebug()
-
-				_debugView.DebugStop()
-				Continue
-			End
-			
-			_console.Write( stdout )
-		
-		Forever
-		
-		If config = "debug"
-			_debugView.DebugEnd()
-			_statusbar.EndDebug()
-		Endif
-		
-		For Local doc := Eachin _openDocs
-			Local mx2Doc := Cast<Mx2Document>( doc )
-			If mx2Doc Then
-				mx2Doc.DebugLine=-1
-			End If
-		Next
-		
-		_browser.CurrentView=tab
-		
-		_console.Write( "Done.~n" )
-
-		_statusbar.SetNormal()
-#end		
 	End
 
 
@@ -2461,14 +2549,21 @@ Class MainWindowInstance Extends Window
 
 
 
-	Method RequestFile:String( title:String,filters:String,save:Bool,path:String="" )
-		Local future:=New Future<String>
+	Method RequestFile:String( title:String, filters:String, save:Bool, path:String="" )
+		Print "RequestFile= "+title+" "+filters+" "+path
+		Local future := New Future<String>
 		
-		App.Idle+=Lambda()
-			future.Set( mojo.requesters.RequestFile( title,filters,save,path ) )
+		App.Idle += Lambda()
+			future.Set( mojo.requesters.RequestFile( title, filters, save, path ) )
 		End
 		
-		Return future.Get()
+		Local out:string =  "oops"
+		
+		If future Then
+			out = future.Get()
+		End If
+		
+		Return out
 	End
 
 
@@ -2486,10 +2581,22 @@ Class MainWindowInstance Extends Window
 		While Not _errors.Empty And _errors.First.removed
 			_errors.RemoveFirst()
 		Wend
+
+		'make sure the displayed cursor line is correct
+		if _currentTextView Then
+			if _currentTextView.Document then
+				If (_currentTextView.Document.CursorLine-1) <> _currentTextView.CursorRow then
+					_statusbar.SetCursor( _currentTextView.Document.CursorLine, _currentTextView.Document.CursorColumn, _currentTextView.Document.CursorChar )
+'					_currentTextView.Document.SelectedIndex = _currentTextView.Document.CursorCodeLine
+				End If
+			end If
+		end if
+
 	
 		_fileClose.Enabled = _currentDoc <> Null
 		_fileCloseAll.Enabled = _openDocs.Length<>0
 		_fileSave.Enabled = _currentDoc <> Null And _currentDoc.Dirty
+		_menuButtonSave.Enabled = _currentDoc <> Null And _currentDoc.Dirty
 		_fileSaveAs.Enabled = _currentDoc <> Null
 		_fileSaveAll.Enabled = dirtyDocs
 		_fileNextFile.Enabled = _docTabber.Count>1
@@ -2515,6 +2622,17 @@ Class MainWindowInstance Extends Window
 		
 		_scripts.Enabled = Not _console.Running
 		_scriptMenu.Enabled = Not _console.Running
+		
+
+		Local textView:=Cast<TextView>( App.KeyView )
+		
+		If textView Then
+			_menuButtonForward.Enabled = keyView.GetCursorForward()
+			_menuButtonBack.Enabled = keyView.GetCursorBack()
+		Else
+			_menuButtonForward.Enabled = false
+			_menuButtonBack.Enabled = false
+		end if
 	End
 
 	
@@ -2524,7 +2642,7 @@ Class MainWindowInstance Extends Window
 		App.RequestRender()
 	
 		App.Idle+=AppIdle
-		
+
 		GCCollect()	'thrash that GC!
 	End
 	

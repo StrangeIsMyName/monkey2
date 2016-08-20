@@ -1,5 +1,5 @@
 
-Namespace ted2
+Namespace ted21
 
 
 
@@ -53,10 +53,8 @@ Class CodeView Extends DockingView
 	Method New()
 		_actionMethod = New Action( "method" )
 		_actionMethod.Triggered = Lambda()
-'			if _docker then
 				_methodButton.Selected = not _methodButton.Selected
 				MethodClicked()
-'			end if
 		End
 		_methodButton = New Buttonx( _actionMethod, "", 40, 40)
 		_methodButton.Selected = true
@@ -65,11 +63,8 @@ Class CodeView Extends DockingView
 			
 		_actionFunction = New Action( "function" )
 		_actionFunction.Triggered = Lambda()
-		'			if _docker then
 			_functionButton.Selected = not _functionButton.Selected
 			FunctionClicked()
-			'        print "function"
-			'			end if
 		End
 		_functionButton = New Buttonx( _actionFunction, "", 40, 40)
 		_functionButton.Selected = true
@@ -77,11 +72,8 @@ Class CodeView Extends DockingView
 			
 		_actionField = New Action( "field" )
 		_actionField.Triggered = Lambda()
-			'			if _docker then
 			_fieldButton.Selected = not _fieldButton.Selected
 			FieldClicked()
-			'        print "field"
-			'			end if
 		End
 		_fieldButton = New Buttonx( _actionField, "", 40, 40)
 		_fieldButton.Selected = true
@@ -89,11 +81,8 @@ Class CodeView Extends DockingView
 			
 		_actionProperty = New Action( "property" )
 		_actionProperty.Triggered = Lambda()
-			'			if _docker then
 			_propertyButton.Selected = not _propertyButton.Selected
 			PropertyClicked()
-			'        print "property"
-			'			end if
 		End
 		_propertyButton = New Buttonx( _actionProperty, "", 40, 40)
 		_propertyButton.Selected = true

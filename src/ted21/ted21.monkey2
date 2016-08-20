@@ -1,5 +1,5 @@
 
-#Import "mojox/mojox"
+#Import "nogox/nogox"
 
 #Import "mainwindow"
 #Import "projectview"
@@ -22,12 +22,13 @@
 #Import "mx2highlighter"
 #Import "imgdocument"
 #Import "fontdocument"
+#Import "audiodocument"
 
-Namespace ted2
+Namespace ted21
 
 Using std..
 Using mojo..
-Using mojox..
+Using nogox..
 
 
 

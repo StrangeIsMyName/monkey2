@@ -1,5 +1,5 @@
 
-Namespace ted2
+Namespace ted21
 
 
 Class HelpView Extends DockingView

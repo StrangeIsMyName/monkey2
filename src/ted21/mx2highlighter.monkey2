@@ -1,5 +1,5 @@
 
-Namespace ted2
+Namespace ted21
 
 Using std.chartype
 

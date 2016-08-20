@@ -1,17 +1,12 @@
 
-Namespace ted2
+Namespace ted21
 
 
 
 
 Class ColorView Extends DockingView
 
- 
-  
-  
-  
-  
-  
+
   
 	Class ColorButtons Extends DockingView
 		Method New( caller:ColorView )
@@ -226,6 +221,14 @@ Class ColorView Extends DockingView
 	
 	End Method
 
+
+
+	Property Text:String()
+		Return _textSelect
+	End
+	
+	
+	
 	Property RGB:String()
 		local ret:String = _redSelect
 		ret = ret.Left(4)
@@ -303,6 +306,11 @@ Protected
 		if difference = 0 and height = 28 then
 			canvas.DrawText( _text, Width - 35 - (_text.Length*6), ypos + height - 20 )
 			canvas.DrawText( _text, Width - 36 - (_text.Length*6), ypos + height - 20 )
+			If _selected = 4 Then
+				_textSelect = _text
+			Else
+				_textSelect = ""	
+			End if
 		end if
 		
 		Return ypos + height
@@ -355,6 +363,7 @@ Private
 	Field _redSelect:Float = 1
 	Field _greenSelect:Float = 0
 	Field _blueSelect:Float = 0
+	Field _textSelect:string = ""
 	
 	Field _selected:Int = -1
 	

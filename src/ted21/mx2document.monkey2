@@ -1,5 +1,5 @@
 
-Namespace ted2
+Namespace ted21
 
 Global Mx2Keywords := New StringMap<String>
 const Mx2Fields:string = "const;field;global;void;bool;byte;ubyte;short;ushort;int;uint;long;ulong;float;double;string;"
@@ -14,7 +14,7 @@ const Mx2Property:string = "property;setter;"
 const Mx2Struct:string = "struct;"
 const Mx2Lambda:string = "lambda;"
 
-Private
+Private 
 
 
 
@@ -60,17 +60,17 @@ Class Mx2Error
 
 
 	
-	Method New( path:String,line:Int,msg:String )
-		Self.path=path
-		Self.line=line
-		Self.msg=msg
+	Method New( path:String, line:Int, msg:String )
+		Self.path = path
+		Self.line = line
+		Self.msg = msg
 	End
 
 
 
 	Operator<=>:Int( err:Mx2Error )
-		If line<err.line Return -1
-		If line>err.line Return 1
+		If line < err.line then Return -1
+		If line > err.line then Return 1
 		Return 0
 	End
 	
@@ -89,7 +89,6 @@ Class Mx2TextView Extends TextView
 		Document.ShowHidden = true
 		Document.ShowHighlightLine = true
 		Document.CodeClicked = Lambda( line:int, txt:string )
-'			print "Line clicked="+line+" "+txt
 			GotoLine( line, txt )
 		end
 
@@ -127,7 +126,7 @@ Class Mx2TextView Extends TextView
 				_editorColors[COLOR_METHOD] = New Color( .25,.6,.82 )
 				_editorColors[COLOR_FUNCTION] = New Color( .61,.36,.72 )
 				_editorColors[COLOR_CLASS] = New Color( .61,.36,.72 )
-				_editorColors[COLOR_PROPERTY] = New Color( .89,.64,.17 )
+				_editorColors[COLOR_PROPERTY] = New Color( .83,.81,.16 )
 				_editorColors[COLOR_STRUCT] = New Color( .25,.6,.82 )
 				_editorColors[COLOR_LAMBDA] = New Color( .89,.64,.17 )
 		End
@@ -196,6 +195,9 @@ Protected
 		local lineLength:int
 		local prevline:int = 0
 		
+		Local currentLine:int = CursorRow+1
+		Local lastLine:int = 0
+		
 		local prevDebug:int = 0
 		local currDebug:int = 0
 		local nextDebug:int = GetDebugState( 0 )
@@ -224,10 +226,17 @@ Protected
 			prevDebug = currDebug
 			currDebug = nextDebug
 			nextDebug = GetDebugState( line + 1 )
-			if line < Document.LineCount-2 and (prevDebug or currDebug or nextDebug) Then
-				canvas.Color = Color.Red
-				canvas.DrawLine( lft, screenY, rght, screenY )
-				canvas.Color = New Color( 1,1,1, 0.2 )
+			if line < lineCount-1 Then
+				If lastLine <= currentLine And line >= currentLine Then
+					canvas.Color = Color.UIBlue
+					canvas.DrawLine( lft, screenY, rght, screenY )
+					canvas.Color = New Color( 1,1,1, 0.2 )
+				End If  
+				If (prevDebug or currDebug or nextDebug) Then
+					canvas.Color = Color.Red
+					canvas.DrawLine( lft, screenY, rght, screenY )
+					canvas.Color = New Color( 1,1,1, 0.2 )
+				End if
 			end if
 			
 			if lineLength > 0 Then
@@ -269,7 +278,7 @@ Protected
 
 			end if
 			screenY += 1
-
+			lastLine = line
 		next
 		
 		
@@ -316,6 +325,9 @@ Protected
 			End If
 			
 			
+				'canvas.Color = Color.White
+				'canvas.DrawText( GetCodeJump( ln ), clip.X+16, lineYPos, 1, 0 )
+
 			icn = GetCodeIcon( i )
 			if icn > 0 then
 				canvas.Color = Color.White
@@ -458,6 +470,7 @@ End
 
 Class Mx2Document Extends Ted2Document
 
+	field CursorMoved2:void()
 
 	Method New( path:String )
 		Super.New( path )

@@ -156,6 +156,29 @@ Class Channel
 		alGenSources( 1,Varptr _alSource )
 	End
 	
+	#rem monkeydoc Channel playhead in samples.
+	If the channel is playing audio this will return the position of the playhaed in the played sound.
+	#end
+	Property Playhead:Float()
+		If Not _alSource Return 0
+	
+'		Local proc:ALint
+'		alGetSourcei( _alSource,AL_BUFFERS_PROCESSED,Varptr proc )
+		
+'		Print "processed: "+proc
+
+		Local playhead:ALfloat
+		
+		alGetSourcef( _alSource, AL_SAMPLE_OFFSET, Varptr playhead )
+
+		Return playhead
+
+
+'		local pos:float
+'		return alGetSourcef( _alSource, AL_SAMPLE_OFFSET, Varptr pos )
+	End
+	
+	
 	#rem monkeydoc True if channel is playing audio.
 	
 	If the channel is playing audio but is in the paused state, this property will still return true.
